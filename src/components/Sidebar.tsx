@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
       {/* Expand/Collapse Button - Always on the right edge */}
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-20 z-10 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+        className="absolute -right-3 top-16 z-10 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
         title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
       >
         <ChevronRight className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
