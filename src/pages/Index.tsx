@@ -60,13 +60,11 @@ const Index = () => {
     videoUrl: currentContent.videoUrl
   };
 
-  // Video content for moderation analysis - updated for NHL fights video
+  // Video content for moderation analysis - dynamic from current item
   const videoContent = `
-    Video Title: NHL Greatest Fights Of All Time
-    Description: Compilation of the most intense and memorable fights in NHL hockey history.
-    Contains themes of: ice hockey, professional sports, physical altercations, competitive fighting.
-    Content may include: aggressive physical contact, fighting, competitive sports violence, athletic confrontations.
-    Context: Sports compilation highlighting physical aspects of professional hockey competition.
+    Video Title: ${contentData.title}
+    Description: Automated safety analysis request for the selected video.
+    Context: User-submitted content under review for policy compliance.
   `;
 
   // Analyze video content with moderation APIs

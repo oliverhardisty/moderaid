@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 
 interface ModerationResult {
   flagged: boolean;
@@ -33,22 +34,12 @@ export const useModeration = (): ModerationHook => {
     setError(null);
 
     try {
-      // Use Supabase function URL
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderate-openai`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ text }),
+      const { data, error } = await supabase.functions.invoke('moderate-openai', {
+        body: { text },
       });
 
-      if (!response.ok) {
-        throw new Error(`OpenAI moderation failed: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result;
+      if (error) throw new Error(`OpenAI moderation failed: ${error.message}`);
+      return data as ModerationResult;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
@@ -63,22 +54,12 @@ export const useModeration = (): ModerationHook => {
     setError(null);
 
     try {
-      // Use Supabase function URL
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderate-azure`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ text }),
+      const { data, error } = await supabase.functions.invoke('moderate-azure', {
+        body: { text },
       });
 
-      if (!response.ok) {
-        throw new Error(`Azure moderation failed: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result;
+      if (error) throw new Error(`Azure moderation failed: ${error.message}`);
+      return data as ModerationResult;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);

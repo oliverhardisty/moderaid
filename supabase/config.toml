@@ -1,1 +1,7 @@
 project_id = "uebocfnmkwvlhdbzuhqg"
+
+[functions.moderate-openai]
+verify_jwt = false
+
+[functions.moderate-azure]
+verify_jwt = false
