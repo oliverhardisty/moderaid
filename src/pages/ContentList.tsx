@@ -21,6 +21,7 @@ interface ContentItem {
   views: number;
   userReports: number;
   priority: 'high' | 'medium' | 'low';
+  videoUrl?: string;
 }
 
 const ContentList = () => {
@@ -46,7 +47,8 @@ const ContentList = () => {
       uploadDate: 'Jan 11, 2024',
       views: 1685,
       userReports: 0,
-      priority: 'medium'
+      priority: 'medium',
+      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
     },
     {
       id: '#99001',
