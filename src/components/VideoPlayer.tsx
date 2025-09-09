@@ -225,32 +225,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
          {/* Control Buttons */}
          <div className="flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             {/* Play/Pause Button */}
+            <div className="flex items-center gap-3">
+              {/* Play/Pause Button */}
               <button 
                 onClick={handlePlayPause}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 {isPlaying ? (
-                  <Pause className="w-6 h-6" fill="hsl(var(--primary))" />
+                  <Pause className="w-6 h-6 text-primary" fill="hsl(var(--primary))" />
                 ) : (
-                  <Play className="w-6 h-6" fill="hsl(var(--primary))" />
+                  <Play className="w-6 h-6 text-primary" fill="hsl(var(--primary))" />
                 )}
               </button>
 
-             {/* Volume Controls */}
-             <div className="flex items-center gap-2">
+              {/* Volume Controls */}
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={() => handleVolumeChange(volume > 0 ? 0 : 1)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   {volume > 0 ? (
-                    <Volume2 className="w-6 h-6" fill="hsl(var(--primary))" />
+                    <Volume2 className="w-6 h-6 text-primary" fill="hsl(var(--primary))" />
                   ) : (
-                    <VolumeX className="w-6 h-6" fill="hsl(var(--primary))" />
+                    <VolumeX className="w-6 h-6 text-primary" fill="hsl(var(--primary))" />
                   )}
                 </button>
-               <div className="w-16 bg-gray-300 rounded-full h-1 cursor-pointer"
+                <div className="w-16 bg-gray-300 rounded-full h-1 cursor-pointer"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const clickX = e.clientX - rect.left;
