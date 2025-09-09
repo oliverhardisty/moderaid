@@ -188,7 +188,7 @@ const Index = () => {
   };
 
   const handleUnblur = () => {
-    setIsContentBlurred(false);
+    setIsContentBlurred(!isContentBlurred);
   };
 
   const handleReportIssue = () => {
