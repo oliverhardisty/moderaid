@@ -5,6 +5,7 @@ import { FlagsPanel } from '@/components/FlagsPanel';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
+import { ModerationTest } from '@/components/ModerationTest';
 
 const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -151,6 +152,9 @@ const Index = () => {
               views={contentData.views}
               viewerReports={contentData.viewerReports}
             />
+
+            {/* Moderation API Test */}
+            <ModerationTest />
           </div>
         </div>
 
