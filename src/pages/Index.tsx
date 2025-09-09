@@ -281,9 +281,9 @@ const Index = () => {
               }`}
             >
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1.29395" y="0.84845" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round"/>
-                <rect x="1.29395" y="0.84845" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeOpacity="0.2" strokeLinecap="round"/>
-                <rect x="11.2563" y="3.31738" width="6.48682" height="4.70145" rx="0.5" stroke="currentColor"/>
+                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round"/>
+                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeOpacity="0.2" strokeLinecap="round"/>
+                <rect x="6.73047" y="3.58093" width="10.5454" height="7.08487" rx="0.5" stroke="currentColor" strokeLinecap="round"/>
               </svg>
             </button>
             <button
@@ -295,9 +295,9 @@ const Index = () => {
               }`}
             >
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round"/>
-                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeOpacity="0.2" strokeLinecap="round"/>
-                <rect x="6.73047" y="3.58093" width="10.5454" height="7.08487" rx="0.5" stroke="currentColor" strokeLinecap="round"/>
+                <rect x="1.29395" y="0.84845" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round"/>
+                <rect x="1.29395" y="0.84845" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeOpacity="0.2" strokeLinecap="round"/>
+                <rect x="11.2563" y="3.31738" width="6.48682" height="4.70145" rx="0.5" stroke="currentColor"/>
               </svg>
             </button>
           </div>
