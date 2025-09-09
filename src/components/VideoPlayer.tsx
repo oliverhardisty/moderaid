@@ -81,12 +81,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
-        {/* Video Element */}
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-          poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg"
+        {/* YouTube Embed */}
+        <iframe
+          className="w-full h-full"
+          src="https://www.youtube.com/embed/7vDiRln38Uk?enablejsapi=1&controls=1&modestbranding=1"
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
         />
 
         {/* Blur Overlay */}
