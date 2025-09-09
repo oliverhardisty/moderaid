@@ -84,7 +84,9 @@ const ContentList = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">
+      <main className={`flex-1 flex flex-col transition-all duration-300 ${
+        sidebarExpanded ? 'ml-64' : 'ml-14'
+      }`}>
         {/* Header */}
         <Header 
           contentId="Content Management"
