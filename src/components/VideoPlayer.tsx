@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface VideoPlayerProps {
   isBlurred: boolean;
@@ -11,23 +11,83 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onUnblur, 
   onReportIssue 
 }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState('0:00');
-  const [duration, setDuration] = useState('0:00');
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [progress, setProgress] = useState(0);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
-  const handleVolumeChange = () => {
-    // Volume control logic
+  const handleVolumeChange = (newVolume: number) => {
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume;
+      setVolume(newVolume);
+    }
   };
+
+  const handleProgressChange = (newProgress: number) => {
+    if (videoRef.current) {
+      const newTime = (newProgress / 100) * duration;
+      videoRef.current.currentTime = newTime;
+      setProgress(newProgress);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const current = videoRef.current.currentTime;
+      const total = videoRef.current.duration;
+      setCurrentTime(current);
+      setProgress((current / total) * 100);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      
+      return () => {
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, []);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
-        {/* Background placeholder when blurred */}
-        <div className="absolute inset-0 bg-gray-800"></div>
+        {/* Video Element */}
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg"
+        />
 
         {/* Blur Overlay */}
         {isBlurred && (
@@ -61,8 +121,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       <div className="bg-white p-4 space-y-4">
         {/* Progress Bar */}
         <div className="w-full">
-          <div className="w-full bg-gray-200 rounded-full h-1">
-            <div className="h-1 bg-purple-600 rounded-full w-1/4"></div>
+          <div className="w-full bg-gray-200 rounded-full h-1 cursor-pointer" 
+               onClick={(e) => {
+                 const rect = e.currentTarget.getBoundingClientRect();
+                 const clickX = e.clientX - rect.left;
+                 const newProgress = (clickX / rect.width) * 100;
+                 handleProgressChange(newProgress);
+               }}>
+            <div 
+              className="h-1 bg-purple-600 rounded-full transition-all" 
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
         </div>
 
@@ -86,21 +155,34 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             {/* Volume Controls */}
             <div className="flex items-center gap-2">
               <button 
-                onClick={handleVolumeChange}
+                onClick={() => handleVolumeChange(volume > 0 ? 0 : 1)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.792L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.792a1 1 0 011.617.792zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                  {volume > 0 ? (
+                    <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.792L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.792a1 1 0 011.617.792zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                  ) : (
+                    <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.792L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.792a1 1 0 011.617.792zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  )}
                 </svg>
               </button>
-              <div className="w-16 bg-gray-300 rounded-full h-1">
-                <div className="h-1 bg-purple-600 rounded-full w-3/4"></div>
+              <div className="w-16 bg-gray-300 rounded-full h-1 cursor-pointer"
+                   onClick={(e) => {
+                     const rect = e.currentTarget.getBoundingClientRect();
+                     const clickX = e.clientX - rect.left;
+                     const newVolume = clickX / rect.width;
+                     handleVolumeChange(Math.max(0, Math.min(1, newVolume)));
+                   }}>
+                <div 
+                  className="h-1 bg-purple-600 rounded-full transition-all" 
+                  style={{ width: `${volume * 100}%` }}
+                ></div>
               </div>
             </div>
 
             {/* Time Display */}
             <span className="text-xs text-gray-600">
-              {currentTime} / {duration}
+              {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
 
