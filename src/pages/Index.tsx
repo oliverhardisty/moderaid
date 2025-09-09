@@ -282,8 +282,7 @@ const Index = () => {
             >
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round"/>
-                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeOpacity="0.2" strokeLinecap="round"/>
-                <rect x="6.73047" y="3.58093" width="10.5454" height="7.08487" rx="0.5" stroke="currentColor" strokeLinecap="round"/>
+                <rect x="6.23047" y="3.08093" width="11.5454" height="8.08487" rx="1" fill="currentColor"/>
               </svg>
             </button>
             <button
