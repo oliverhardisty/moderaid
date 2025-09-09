@@ -174,6 +174,7 @@ const ContentList = () => {
         <Header 
           contentId="Content Management"
           priority="high"
+          itemCount={filteredContent.length}
         />
 
         {/* Content Area */}

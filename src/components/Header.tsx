@@ -5,9 +5,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 interface HeaderProps {
   contentId: string;
   priority: 'high' | 'medium' | 'low';
+  itemCount?: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
+export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount }) => {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -46,14 +47,22 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
 
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-bold text-gray-900">
-          {contentId}
+          {showBackButton ? contentId : 'Your Content'}
         </h1>
-        <Badge 
-          variant="destructive"
-          className="bg-red-600 text-white px-3 py-1 text-xs font-medium"
-        >
-          High Priority
-        </Badge>
+        {showBackButton ? (
+          <Badge 
+            variant="destructive"
+            className="bg-red-600 text-white px-3 py-1 text-xs font-medium"
+          >
+            High Priority
+          </Badge>
+        ) : (
+          <Badge 
+            className="bg-gray-100 text-gray-800 px-3 py-1 text-xs font-medium"
+          >
+            {itemCount || 0} items
+          </Badge>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
