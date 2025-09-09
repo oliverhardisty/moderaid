@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { VideoUploadDialog } from '@/components/VideoUploadDialog';
 import { 
   Select,
   SelectContent,
@@ -11,17 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Flag } from 'lucide-react';
+import { Search, Plus, Flag, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useContentItems } from '@/hooks/useContentItems';
 
 interface ContentItem {
   id: string;
   title: string;
-  uploadDate: string;
+  upload_date: string;
   views: number;
-  userReports: number;
+  user_reports: number;
   priority: 'high' | 'medium' | 'low';
-  videoUrl?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  video_url?: string;
+  storage_path?: string;
+  file_size?: number;
 }
 
 const ContentList = () => {
@@ -31,106 +36,10 @@ const ContentList = () => {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [uploadDateFilter, setUploadDateFilter] = useState('all');
   const [viewsFilter, setViewsFilter] = useState('all');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  
+  const { contentItems, loading, refetch } = useContentItems();
 
-  const contentItems: ContentItem[] = [
-    {
-      id: '#67890',
-      title: 'NHL Greatest Fights Of All Time',
-      uploadDate: 'Mar 12, 2024',
-      views: 15781,
-      userReports: 12,
-      priority: 'high'
-    },
-    {
-      id: '#77889',
-      title: 'Cooking Tutorial - Italian Pasta',
-      uploadDate: 'Jan 11, 2024',
-      views: 1685,
-      userReports: 0,
-      priority: 'medium',
-      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
-    },
-    {
-      id: '#99001',
-      title: 'DIY Home Improvement Tips',
-      uploadDate: 'Jan 10, 2024',
-      views: 562,
-      userReports: 1,
-      priority: 'low'
-    },
-    {
-      id: '#55332',
-      title: 'Gaming Review - Latest RPG',
-      uploadDate: 'Jan 8, 2024',
-      views: 789,
-      userReports: 7,
-      priority: 'high'
-    },
-    {
-      id: '#66445',
-      title: 'Tech Review - Smartphone Comparison',
-      uploadDate: 'Jan 5, 2024',
-      views: 1456,
-      userReports: 4,
-      priority: 'high'
-    },
-    {
-      id: '#73625',
-      title: 'Fitness Workout - Morning Routine',
-      uploadDate: 'Jan 3, 2024',
-      views: 1534,
-      userReports: 1,
-      priority: 'low'
-    },
-    {
-      id: '#95613',
-      title: 'Music Performance - Live Concert',
-      uploadDate: 'Jan 1, 2024',
-      views: 2187,
-      userReports: 0,
-      priority: 'medium'
-    },
-    {
-      id: '#15396',
-      title: 'Educational Content - Science Experiment',
-      uploadDate: 'Dec 30, 2023',
-      views: 1898,
-      userReports: 0,
-      priority: 'medium'
-    },
-    {
-      id: '#39152',
-      title: 'Comedy Sketch - Office Parody',
-      uploadDate: 'Dec 28, 2023',
-      views: 3247,
-      userReports: 6,
-      priority: 'medium'
-    },
-    {
-      id: '#52138',
-      title: 'Documentary - Environmental Awareness',
-      uploadDate: 'Dec 26, 2023',
-      views: 987,
-      userReports: 1,
-      priority: 'high'
-    },
-    {
-      id: '#81749',
-      title: 'Travel Vlog - European Adventure',
-      uploadDate: 'Dec 25, 2023',
-      views: 1342,
-      userReports: 2,
-      priority: 'low'
-    },
-    {
-      id: '#42617',
-      title: 'Product Unboxing - Tech Gadgets',
-      uploadDate: 'Dec 24, 2023',
-      views: 876,
-      userReports: 0,
-      priority: 'medium'
-    }
-  ];
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
@@ -153,6 +62,10 @@ const ContentList = () => {
 
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
+  };
+
+  const handleUploadComplete = () => {
+    refetch(); // Refresh the content list after upload
   };
 
   const filteredContent = contentItems.filter(item => {
@@ -231,7 +144,10 @@ const ContentList = () => {
                   className="pl-10 w-80"
                 />
               </div>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Button 
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={() => setUploadDialogOpen(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add content
               </Button>
@@ -240,63 +156,102 @@ const ContentList = () => {
 
           {/* Content Table */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Content title</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Content ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Upload Date</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Views</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">User reports</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredContent.map((item, index) => (
-                    <tr 
-                      key={item.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => handleContentClick(item.id)}
-                    >
-                      <td className="py-4 px-4">
-                        <div className="font-medium text-gray-900">{item.title}</div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-gray-600 font-mono text-sm">{item.id}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-gray-600">{item.uploadDate}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-gray-900 font-medium">{item.views.toLocaleString()}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        {item.userReports > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <Flag className="w-3 h-3 text-red-500" />
-                            <span className="text-red-600 font-medium">{item.userReports}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-4">
-                        {getPriorityBadge(item.priority)}
-                      </td>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-2" />
+                <span className="text-gray-600">Loading content...</span>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Content title</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Content ID</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Upload Date</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Views</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">User reports</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Priority</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredContent.map((item, index) => (
+                      <tr 
+                        key={item.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => handleContentClick(item.id)}
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-gray-900">{item.title}</div>
+                          {item.file_size && (
+                            <div className="text-xs text-gray-500">
+                              {(item.file_size / (1024 * 1024)).toFixed(1)} MB
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-gray-600 font-mono text-sm">{item.id}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-gray-600">{item.upload_date}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-gray-900 font-medium">{item.views.toLocaleString()}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          {item.user_reports > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <Flag className="w-3 h-3 text-red-500" />
+                              <span className="text-red-600 font-medium">{item.user_reports}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-4">
+                          {getPriorityBadge(item.priority)}
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}>
+                            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
-          {filteredContent.length === 0 && (
+          {!loading && filteredContent.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No content items match your current filters.</p>
+              <p className="text-gray-500 mb-4">
+                {contentItems.length === 0 
+                  ? "No content uploaded yet. Click 'Add content' to upload your first video."
+                  : "No content items match your current filters."
+                }
+              </p>
+              {contentItems.length === 0 && (
+                <Button 
+                  onClick={() => setUploadDialogOpen(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Upload First Video
+                </Button>
+              )}
             </div>
           )}
         </div>
+
+        {/* Video Upload Dialog */}
+        <VideoUploadDialog
+          open={uploadDialogOpen}
+          onOpenChange={setUploadDialogOpen}
+          onUploadComplete={handleUploadComplete}
+        />
       </main>
     </div>
   );
