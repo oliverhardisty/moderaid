@@ -41,7 +41,8 @@ const Index = () => {
     uploadDate: 'Jan 11, 2024',
     views: 1685,
     userReports: 0,
-    priority: 'medium' as const
+    priority: 'medium' as const,
+    videoUrl: 'https://www.example.com/videos/violent-content-test.mp4'
   }, {
     id: '#99001',
     title: 'DIY Home Improvement Tips',
