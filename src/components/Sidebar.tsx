@@ -19,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   ];
 
   return (
-    <aside className={`relative flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
+    <aside className={`relative flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 z-50 ${
       isExpanded ? 'w-64' : 'w-14'
     }`}>
       {/* Expand/Collapse Button - Always on the right edge */}
