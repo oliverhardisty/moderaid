@@ -19,17 +19,45 @@ const Index = () => {
   
   const { moderateWithBoth } = useModeration();
 
-  // Mock data - in real app, this would be fetched based on contentId
+  // Content data - fetch from ContentList data structure
+  const allContentItems = [
+    {
+      id: '#67890',
+      title: 'NHL Greatest Fights Of All Time',
+      uploadDate: 'Mar 12, 2024',
+      views: 15781,
+      userReports: 12,
+      priority: 'high' as const
+    },
+    {
+      id: '#77889',
+      title: 'Cooking Tutorial - Italian Pasta',
+      uploadDate: 'Jan 11, 2024',
+      views: 1685,
+      userReports: 0,
+      priority: 'medium' as const,
+      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
+    },
+    {
+      id: '#99001',
+      title: 'DIY Home Improvement Tips',
+      uploadDate: 'Jan 10, 2024',
+      views: 562,
+      userReports: 1,
+      priority: 'low' as const
+    }
+  ];
+
+  const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
+  
   const contentData = {
-    id: contentId ? `#${contentId}` : "#67890", // Add # back for display
-    priority: "high" as const,
-    title: contentId === "67890" ? "NHL Greatest Fights Of All Time" : 
-           contentId === "77889" ? "Cooking Tutorial - Italian Pasta" :
-           contentId === "99001" ? "DIY Home Improvement Tips" :
-           "Content Item - Under Review",
-    uploadDate: contentId === "67890" ? "12/03/2024" : "15/01/2024",
-    views: contentId === "67890" ? 60324 : 2156,
-    viewerReports: contentId === "67890" ? 12 : 8,
+    id: currentContent.id,
+    priority: currentContent.priority,
+    title: currentContent.title,
+    uploadDate: currentContent.uploadDate.replace(/(\w+)\s(\d+),\s(\d+)/, '$2/$1/$3'),
+    views: currentContent.views,
+    viewerReports: currentContent.userReports,
+    videoUrl: currentContent.videoUrl
   };
 
   // Video content for moderation analysis - updated for NHL fights video
@@ -235,6 +263,7 @@ const Index = () => {
               isBlurred={isContentBlurred}
               onUnblur={handleUnblur}
               onReportIssue={handleReportIssue}
+              videoUrl={contentData.videoUrl}
             />
             
             <ContentMetadata 

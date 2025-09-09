@@ -12,12 +12,14 @@ interface VideoPlayerProps {
   isBlurred: boolean;
   onUnblur: () => void;
   onReportIssue: () => void;
+  videoUrl?: string;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
   isBlurred, 
   onUnblur, 
-  onReportIssue 
+  onReportIssue,
+  videoUrl 
 }) => {
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -28,7 +30,30 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   
-  const videoId = 'UDdy1vI_oiU'; // Extract video ID from URL
+  // Convert Google Drive URL to embeddable format or use default
+  const getEmbedUrl = (url?: string) => {
+    if (!url) return 'UDdy1vI_oiU'; // Default YouTube video
+    
+    if (url.includes('drive.google.com')) {
+      // Extract file ID from Google Drive URL
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
+    
+    // For YouTube URLs, extract video ID
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      return match ? match[1] : 'UDdy1vI_oiU';
+    }
+    
+    return url;
+  };
+
+  const videoSource = getEmbedUrl(videoUrl);
+  const isGoogleDrive = videoUrl?.includes('drive.google.com');
+  const videoId = isGoogleDrive ? null : videoSource;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -80,9 +105,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const initializePlayer = async () => {
+    if (isGoogleDrive) {
+      setIsPlayerReady(true);
+      return;
+    }
+
     await loadYouTubeAPI();
     
-    if (playerContainerRef.current) {
+    if (playerContainerRef.current && videoId) {
       playerRef.current = new window.YT.Player(playerContainerRef.current, {
         videoId: videoId,
         width: '100%',
@@ -136,11 +166,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
-        {/* YouTube Player Container */}
-        <div 
-          ref={playerContainerRef}
-          className="w-full h-full"
-        />
+        {/* Video Player Container */}
+        {isGoogleDrive ? (
+          <iframe 
+            src={videoSource}
+            className="w-full h-full"
+            allow="autoplay"
+            allowFullScreen
+          />
+        ) : (
+          <div 
+            ref={playerContainerRef}
+            className="w-full h-full"
+          />
+        )}
 
         {/* Blur Overlay */}
         {isBlurred && (
