@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -6,7 +6,7 @@ import { FlagsPanel } from '@/components/FlagsPanel';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
-import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
+import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -17,6 +17,10 @@ const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [moderationFlags, setModerationFlags] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [isCompactView, setIsCompactView] = useState(false);
+  
+  const leftPanelRef = useRef<ImperativePanelHandle>(null);
+  const rightPanelRef = useRef<ImperativePanelHandle>(null);
   
   const { moderateWithBoth, moderateWithGoogleVideo } = useModeration();
 
@@ -190,6 +194,21 @@ const Index = () => {
     // Handle report issue logic
   };
 
+  const toggleCompactView = () => {
+    const newCompactView = !isCompactView;
+    setIsCompactView(newCompactView);
+    
+    if (newCompactView) {
+      // Compact view: maximize left panel (50%), minimize right panel (40%)
+      leftPanelRef.current?.resize(60);
+      rightPanelRef.current?.resize(40);
+    } else {
+      // Normal view: restore default sizes
+      leftPanelRef.current?.resize(30);
+      rightPanelRef.current?.resize(70);
+    }
+  };
+
   const handleAccept = async () => {
     setIsProcessing(true);
     try {
@@ -248,11 +267,32 @@ const Index = () => {
           priority={contentData.priority}
         />
 
+        {/* View Toggle */}
+        <div className="px-4 pb-2 border-b border-gray-200">
+          <button
+            onClick={toggleCompactView}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              isCompactView 
+                ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isCompactView ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              )}
+            </svg>
+            {isCompactView ? 'Normal View' : 'Compact View'}
+          </button>
+        </div>
+
         {/* Content Area */}
         <div className="flex-1 p-4">
           <PanelGroup direction="horizontal" className="h-full">
             {/* Left Panel - Flags and Reports */}
-            <Panel defaultSize={30} minSize={20} maxSize={50}>
+            <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
                 <FlagsPanel 
                   flags={moderationFlags}
@@ -270,7 +310,7 @@ const Index = () => {
             </PanelResizeHandle>
 
             {/* Right Panel - Video Player and Metadata */}
-            <Panel defaultSize={70} minSize={40}>
+            <Panel ref={rightPanelRef} defaultSize={70} minSize={40}>
               <div className="flex flex-col gap-4 h-full pl-4">
                 <VideoPlayer 
                   isBlurred={isContentBlurred}
