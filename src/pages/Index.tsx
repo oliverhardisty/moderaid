@@ -8,7 +8,7 @@ import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import { Switch } from '@/components/ui/switch';
-import { PanelLeft, PanelLeftOpen } from 'lucide-react';
+import { Layout, PanelLeft } from 'lucide-react';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -280,7 +280,7 @@ const Index = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <PanelLeftOpen size={16} />
+              <Layout size={16} />
             </button>
             <button
               onClick={() => isCompactView || toggleCompactView()}
