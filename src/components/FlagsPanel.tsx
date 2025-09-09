@@ -127,7 +127,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                   <svg className="w-8 h-8 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-sm font-semibold text-green-700">No violating flags detected</p>
+                  <p className="text-sm font-semibold text-black">No violating flags detected</p>
                   <p className="text-xs text-gray-600 mt-1">
                     Content analyzed and approved with {overallConfidence}% confidence
                   </p>
