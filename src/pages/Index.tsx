@@ -110,7 +110,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex items-stretch flex-wrap min-h-screen">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <Sidebar 
         isExpanded={sidebarExpanded} 
@@ -118,39 +118,39 @@ const Index = () => {
       />
 
       {/* Main Content Area */}
-      <main className="min-w-60 min-h-[965px] flex-1 shrink basis-[0%] max-md:max-w-full">
-        <div className="w-full bg-neutral-50 pb-10 max-md:max-w-full">
-          {/* Header */}
-          <Header 
-            contentId={contentData.id}
-            priority={contentData.priority}
-          />
+      <main className="flex-1 flex flex-col">
+        {/* Header */}
+        <Header 
+          contentId={contentData.id}
+          priority={contentData.priority}
+        />
 
-          {/* Content Area */}
-          <div className="justify-center items-stretch flex min-h-[771px] w-full gap-[21px] flex-wrap mt-5 px-[13px] max-md:max-w-full">
-            {/* Left Panel - Flags and Reports */}
+        {/* Content Area */}
+        <div className="flex-1 flex gap-4 p-4">
+          {/* Left Panel - Flags and Reports */}
+          <div className="w-80 flex-shrink-0">
             <FlagsPanel 
               flags={flagsData}
               userReports={3}
               uploaderStatus="good"
               moderationHistory={3}
             />
+          </div>
 
-            {/* Right Panel - Video Player and Metadata */}
-            <div className="min-w-60 overflow-hidden grow shrink w-[1191px] max-md:max-w-full">
-              <VideoPlayer 
-                isBlurred={isContentBlurred}
-                onUnblur={handleUnblur}
-                onReportIssue={handleReportIssue}
-              />
-              
-              <ContentMetadata 
-                title={contentData.title}
-                uploadDate={contentData.uploadDate}
-                views={contentData.views}
-                viewerReports={contentData.viewerReports}
-              />
-            </div>
+          {/* Right Panel - Video Player and Metadata */}
+          <div className="flex-1 flex flex-col gap-4">
+            <VideoPlayer 
+              isBlurred={isContentBlurred}
+              onUnblur={handleUnblur}
+              onReportIssue={handleReportIssue}
+            />
+            
+            <ContentMetadata 
+              title={contentData.title}
+              uploadDate={contentData.uploadDate}
+              views={contentData.views}
+              viewerReports={contentData.viewerReports}
+            />
           </div>
         </div>
 

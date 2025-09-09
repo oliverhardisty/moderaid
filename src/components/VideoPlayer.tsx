@@ -24,128 +24,104 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   return (
-    <div className="flex w-full items-center justify-center max-md:max-w-full">
-      <div className="self-stretch relative flex min-w-60 w-full flex-col overflow-hidden flex-1 shrink basis-[0%] bg-black my-auto rounded-[8.75px] max-md:max-w-full">
-        {/* Background Video/Image */}
-        <div className="max-w-[1227px] self-stretch blur-[20px] z-0 w-full overflow-hidden text-[28px] text-white font-normal text-center max-md:max-w-full">
-          <div className="flex min-h-[690px] flex-col overflow-hidden items-center justify-center px-[153px] max-md:max-w-full max-md:px-5">
-            <div className="max-w-full w-[920px] overflow-hidden">
-              <div className="bg-[rgba(51,51,51,1)] flex flex-col items-center justify-center fill-[#333] px-[70px] py-[329px] max-md:max-w-full max-md:px-5 max-md:py-[100px]">
-                <div className="text-[28px] font-normal mb-[-68px] max-md:mb-2.5">
-                  Video Player
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
+        {/* Background placeholder when blurred */}
+        <div className="absolute inset-0 bg-gray-800"></div>
 
         {/* Blur Overlay */}
         {isBlurred && (
-          <div className="justify-center items-center absolute z-0 flex max-w-full w-[1255px] text-white text-center bg-[#101828] py-[227px] rounded-[8.75px] top-0 bottom-[90px] inset-x-0 max-md:py-[100px]">
-            <div className="self-stretch flex min-w-60 w-[376px] flex-col items-stretch my-auto p-[21px] max-md:px-5">
-              <img
-                src="https://api.builder.io/api/v1/image/assets/TEMP/0badc2994ef08ed7c6578d83e413ed410ab7fc9f?placeholderIfAbsent=true"
-                className="aspect-[1] object-contain w-[42px] self-center"
-                alt="Shield icon"
-              />
-              <div className="flex flex-col items-center text-base font-medium leading-loose mt-3.5">
-                <h3 className="font-medium leading-[24.5px]">
-                  Content Blurred for Protection
-                </h3>
+          <div className="absolute inset-0 bg-gray-900/90 flex items-center justify-center">
+            <div className="text-center text-white p-8">
+              <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
               </div>
-              <div className="items-center opacity-75 flex flex-col text-xs font-normal leading-none mt-1.5">
-                <p className="font-normal leading-[17.5px]">
-                  This content has been flagged as potentially sensitive material
-                </p>
-              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                Content Blurred for Protection
+              </h3>
+              <p className="text-sm text-gray-300">
+                This content has been flagged as potentially sensitive material
+              </p>
             </div>
           </div>
         )}
 
         {/* Settings Button */}
-        <div className="absolute z-0 w-8 right-3.5 top-3.5">
-          <button className="justify-center items-center backdrop-blur-sm flex min-h-7 w-full bg-[rgba(0,0,0,0.30)] pl-2 pr-[9px] py-[7px] rounded-[6.75px] hover:bg-[rgba(0,0,0,0.40)] transition-colors">
-            <img
-              src="https://api.builder.io/api/v1/image/assets/TEMP/a178edca854b0105e974bcdf11825397fd1fe8ab?placeholderIfAbsent=true"
-              className="aspect-[1] object-contain w-3.5 self-stretch my-auto"
-              alt="Settings"
-            />
-          </button>
+        <button className="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-lg transition-colors">
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </button>
+
+      </div>
+      
+      {/* Video Controls */}
+      <div className="bg-white p-4 space-y-4">
+        {/* Progress Bar */}
+        <div className="w-full">
+          <div className="w-full bg-gray-200 rounded-full h-1">
+            <div className="h-1 bg-purple-600 rounded-full w-1/4"></div>
+          </div>
         </div>
 
-        {/* Video Controls */}
-        <div className="items-center absolute z-0 flex w-full max-w-[1255px] flex-col gap-[12.5px] bg-white pt-6 border-t border-solid bottom-0 inset-x-0 max-md:max-w-full">
-          {/* Progress Bar */}
-          <div className="justify-center items-center self-center flex h-1 w-[1199px] max-w-full rounded-[8.75px]">
-            <div className="self-stretch flex min-h-4 min-w-60 w-full flex-1 shrink basis-[0%] my-auto max-md:max-w-full bg-gray-200 rounded-full">
-              <div className="h-1 bg-purple-600 rounded-full w-1/4"></div>
+        {/* Control Buttons */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Play/Pause Button */}
+            <button 
+              onClick={handlePlayPause}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                {isPlaying ? (
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                ) : (
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                )}
+              </svg>
+            </button>
+
+            {/* Volume Controls */}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleVolumeChange}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.792L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.792a1 1 0 011.617.792zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <div className="w-16 bg-gray-300 rounded-full h-1">
+                <div className="h-1 bg-purple-600 rounded-full w-3/4"></div>
+              </div>
             </div>
+
+            {/* Time Display */}
+            <span className="text-xs text-gray-600">
+              {currentTime} / {duration}
+            </span>
           </div>
 
-          {/* Control Buttons */}
-          <div className="justify-between items-center flex w-full gap-[40px_100px] flex-wrap mt-[13px] pb-[11px] px-3.5 max-md:max-w-full">
-            <div className="items-center self-stretch flex gap-[10.5px] my-auto">
-              {/* Play/Pause Button */}
-              <button 
-                onClick={handlePlayPause}
-                className="self-stretch flex min-h-7 items-center justify-center w-[35px] my-auto px-[9px] py-1.5 rounded-[7px] hover:bg-gray-100 transition-colors"
-              >
-                <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/2c7a4a7a4b48497164b9a504a54a743b57611893?placeholderIfAbsent=true"
-                  className="aspect-[1] object-contain w-[17px] self-stretch my-auto"
-                  alt={isPlaying ? "Pause" : "Play"}
-                />
-              </button>
-
-              {/* Volume Controls */}
-              <div className="items-center self-stretch flex gap-[7px] my-auto">
-                <button 
-                  onClick={handleVolumeChange}
-                  className="self-stretch flex min-h-7 items-center justify-center w-8 my-auto pl-2 pr-[9px] py-[7px] rounded-[7px] hover:bg-gray-100 transition-colors"
-                >
-                  <img
-                    src="https://api.builder.io/api/v1/image/assets/TEMP/6d012f4864018af7f35157686e30d12573a28e05?placeholderIfAbsent=true"
-                    className="aspect-[1] object-contain w-3.5 self-stretch my-auto"
-                    alt="Volume"
-                  />
-                </button>
-                <div className="self-stretch flex w-14 shrink-0 h-[3px] my-auto rounded-[8.75px] bg-gray-300">
-                  <div className="h-full bg-purple-600 rounded-full w-3/4"></div>
-                </div>
-              </div>
-
-              {/* Time Display */}
-              <div className="self-stretch text-xs text-[#364153] font-normal leading-none my-auto">
-                <span className="font-normal leading-[17.5px]">
-                  {currentTime} / {duration}
-                </span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="items-center self-stretch flex gap-[6.99px] text-xs font-medium text-center leading-none my-auto">
-              <button 
-                onClick={onUnblur}
-                className="justify-center items-center border self-stretch flex min-h-8 gap-[7px] text-[#8800ff] whitespace-nowrap bg-white my-auto px-4 py-[7px] rounded-[6.75px] border-solid border-[#80F] hover:bg-purple-50 transition-colors"
-              >
-                <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/a1026800996702cce682d70518bd0a9d29762d59?placeholderIfAbsent=true"
-                  className="aspect-[1] object-contain w-3.5 self-stretch shrink-0 my-auto"
-                  alt="Unblur icon"
-                />
-                <span className="font-medium leading-[17.5px] self-stretch my-auto">
-                  Unblur
-                </span>
-              </button>
-              <button 
-                onClick={onReportIssue}
-                className="justify-center items-center self-stretch flex min-h-8 text-white bg-[#80F] my-auto px-4 rounded-[6.75px] hover:bg-purple-700 transition-colors"
-              >
-                <span className="font-medium leading-[17.5px] self-stretch my-auto">
-                  Report issue
-                </span>
-              </button>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={onUnblur}
+              className="flex items-center gap-2 text-purple-600 border border-purple-600 bg-white hover:bg-purple-50 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Unblur
+            </button>
+            <button 
+              onClick={onReportIssue}
+              className="bg-purple-600 text-white hover:bg-purple-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            >
+              Report issue
+            </button>
           </div>
         </div>
       </div>

@@ -14,69 +14,45 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   disabled = false
 }) => {
   return (
-    <footer className="items-center shadow-[0_1px_3px_0_rgba(0,0,0,0.10),0_1px_2px_-1px_rgba(0,0,0,0.10)] flex w-full flex-col overflow-hidden bg-white pt-[15px] pb-3.5 px-3.5 border-t-[rgba(110,80,73,0.20)] border-t border-solid max-md:max-w-full">
-      <div className="justify-center items-center flex gap-3.5 max-md:max-w-full">
+    <footer className="bg-white border-t border-gray-200 p-4">
+      <div className="flex justify-center gap-4">
         {/* Accept Button */}
         <button
           onClick={onAccept}
           disabled={disabled}
-          className="justify-center items-center self-stretch flex min-h-11 w-[140px] bg-[#00A63E] my-auto px-[11px] py-[13px] rounded-[6.75px] hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
           aria-label="Accept content"
         >
-          <div className="self-stretch flex min-h-3.5 flex-col w-[21px] my-auto pr-[7px]">
-            <div className="flex min-h-3.5 w-3.5 flex-col overflow-hidden items-center justify-center">
-              <img
-                src="https://api.builder.io/api/v1/image/assets/TEMP/5f66d44b4b38ac8b5acdedb2c80032a59acd5a78?placeholderIfAbsent=true"
-                className="aspect-[1] object-contain w-full flex-1"
-                alt="Accept icon"
-              />
-            </div>
-          </div>
-          <span className="text-white text-center text-sm font-bold leading-[17.5px] self-stretch my-auto">
-            Accept
-          </span>
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          Accept
         </button>
 
         {/* Reject Button */}
         <button
           onClick={onReject}
           disabled={disabled}
-          className="justify-center items-center self-stretch flex min-h-11 w-[140px] bg-[#E7000B] my-auto px-[11px] py-[13px] rounded-[6.75px] hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
           aria-label="Reject content"
         >
-          <div className="self-stretch flex min-h-3.5 flex-col w-[21px] my-auto pr-[7px]">
-            <div className="flex min-h-3.5 w-3.5 flex-col overflow-hidden items-center justify-center">
-              <img
-                src="https://api.builder.io/api/v1/image/assets/TEMP/d8d4d8a5779f1bd3e8d3ecc69007751a49dfb142?placeholderIfAbsent=true"
-                className="aspect-[1] object-contain w-full flex-1"
-                alt="Reject icon"
-              />
-            </div>
-          </div>
-          <span className="text-white text-center text-sm font-bold leading-[17.5px] self-stretch my-auto">
-            Reject
-          </span>
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+          Reject
         </button>
 
         {/* Escalate Button */}
         <button
           onClick={onEscalate}
           disabled={disabled}
-          className="justify-center items-center border self-stretch flex min-h-11 w-[140px] bg-white my-auto px-3 py-[13px] rounded-[6.75px] border-solid border-[#99A1AF] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
           aria-label="Escalate content for further review"
         >
-          <div className="self-stretch flex min-h-3.5 flex-col w-[21px] my-auto pr-[7px]">
-            <div className="flex min-h-3.5 w-3.5 flex-col overflow-hidden items-center justify-center">
-              <img
-                src="https://api.builder.io/api/v1/image/assets/TEMP/1a3a51a3559198539b81ea7ddc8b1418154bab00?placeholderIfAbsent=true"
-                className="aspect-[1] object-contain w-full flex-1"
-                alt="Escalate icon"
-              />
-            </div>
-          </div>
-          <span className="text-[#364153] text-center text-sm font-bold leading-[17.5px] self-stretch my-auto">
-            Escalate
-          </span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+          </svg>
+          Escalate
         </button>
       </div>
     </footer>
