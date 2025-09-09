@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.moderate-azure]
 verify_jwt = false
+
+[functions.moderate-video]
+verify_jwt = false

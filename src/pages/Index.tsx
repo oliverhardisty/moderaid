@@ -17,7 +17,7 @@ const Index = () => {
   const [moderationFlags, setModerationFlags] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   
-  const { moderateWithBoth } = useModeration();
+  const { moderateWithBoth, moderateWithGoogleVideo } = useModeration();
 
   // Content data - fetch from ContentList data structure
   const allContentItems = [
@@ -84,8 +84,11 @@ const Index = () => {
     setIsAnalyzing(true);
     try {
       console.log('Calling moderation APIs with content:', videoContent);
-      const results = await moderateWithBoth(videoContent);
-      console.log('Moderation results received:', results);
+      const [results, googleVideo] = await Promise.all([
+        moderateWithBoth(videoContent),
+        contentData.videoUrl ? moderateWithGoogleVideo(contentData.videoUrl).catch(() => null) : Promise.resolve(null)
+      ]);
+      console.log('Moderation results received:', results, googleVideo);
       
       const flags = [];
       
@@ -119,6 +122,23 @@ const Index = () => {
             model: 'Azure Content Safety',
             description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
             icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+          });
+        });
+      }
+
+      // Create flags based on Google Video Intelligence results
+      if (googleVideo && googleVideo.flagged) {
+        googleVideo.categories.forEach((category, index) => {
+          const score = googleVideo.categoryScores[category] || 0;
+          flags.push({
+            id: `gvi-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date().toLocaleString(),
+            model: 'Google Video Intelligence',
+            description: `Google Video Intelligence detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
         });
       }
