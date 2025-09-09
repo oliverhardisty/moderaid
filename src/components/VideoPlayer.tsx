@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+// YouTube Player API types
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+    YT: any;
+  }
+}
+
 interface VideoPlayerProps {
   isBlurred: boolean;
   onUnblur: () => void;
@@ -11,12 +19,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onUnblur, 
   onReportIssue 
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<any>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(100);
   const [progress, setProgress] = useState(0);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  
+  const videoId = '7vDiRln38Uk'; // Extract video ID from URL
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -25,70 +37,109 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handlePlayPause = () => {
-    if (videoRef.current) {
+    if (playerRef.current && isPlayerReady) {
       if (isPlaying) {
-        videoRef.current.pause();
+        playerRef.current.pauseVideo();
       } else {
-        videoRef.current.play();
+        playerRef.current.playVideo();
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-      setVolume(newVolume);
+    if (playerRef.current && isPlayerReady) {
+      const volumePercent = newVolume * 100;
+      playerRef.current.setVolume(volumePercent);
+      setVolume(volumePercent);
     }
   };
 
   const handleProgressChange = (newProgress: number) => {
-    if (videoRef.current) {
+    if (playerRef.current && isPlayerReady && duration > 0) {
       const newTime = (newProgress / 100) * duration;
-      videoRef.current.currentTime = newTime;
+      playerRef.current.seekTo(newTime);
       setProgress(newProgress);
     }
   };
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const current = videoRef.current.currentTime;
-      const total = videoRef.current.duration;
-      setCurrentTime(current);
-      setProgress((current / total) * 100);
-    }
+  const loadYouTubeAPI = () => {
+    return new Promise((resolve) => {
+      if (window.YT && window.YT.Player) {
+        resolve(window.YT);
+        return;
+      }
+
+      window.onYouTubeIframeAPIReady = () => {
+        resolve(window.YT);
+      };
+
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(script);
+    });
   };
 
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
+  const initializePlayer = async () => {
+    await loadYouTubeAPI();
+    
+    if (playerContainerRef.current) {
+      playerRef.current = new window.YT.Player(playerContainerRef.current, {
+        videoId: videoId,
+        width: '100%',
+        height: '100%',
+        playerVars: {
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          fs: 1,
+          cc_load_policy: 0,
+          iv_load_policy: 3,
+          autohide: 0
+        },
+        events: {
+          onReady: (event: any) => {
+            setIsPlayerReady(true);
+            setDuration(event.target.getDuration());
+            setVolume(event.target.getVolume());
+          },
+          onStateChange: (event: any) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
+          }
+        }
+      });
     }
   };
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      
-      return () => {
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
-    }
+    initializePlayer();
   }, []);
+
+  useEffect(() => {
+    if (isPlayerReady && playerRef.current) {
+      const updateTime = () => {
+        const current = playerRef.current.getCurrentTime();
+        const total = playerRef.current.getDuration();
+        setCurrentTime(current);
+        setProgress((current / total) * 100);
+      };
+
+      const interval = setInterval(updateTime, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isPlayerReady]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
-        {/* YouTube Embed */}
-        <iframe
+        {/* YouTube Player Container */}
+        <div 
+          ref={playerContainerRef}
           className="w-full h-full"
-          src="https://www.youtube.com/embed/7vDiRln38Uk?enablejsapi=1&controls=1&modestbranding=1"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
         />
 
         {/* Blur Overlay */}
@@ -172,12 +223,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                    onClick={(e) => {
                      const rect = e.currentTarget.getBoundingClientRect();
                      const clickX = e.clientX - rect.left;
-                     const newVolume = clickX / rect.width;
+                     const newVolume = (clickX / rect.width);
                      handleVolumeChange(Math.max(0, Math.min(1, newVolume)));
                    }}>
                 <div 
                   className="h-1 bg-purple-600 rounded-full transition-all" 
-                  style={{ width: `${volume * 100}%` }}
+                  style={{ width: `${volume}%` }}
                 ></div>
               </div>
             </div>
