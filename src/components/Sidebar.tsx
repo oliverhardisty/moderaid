@@ -54,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
         <ChevronRight className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
       </button>
       {/* Header Section */}
-      <div className="flex items-center h-16 px-2 border-b border-gray-100">
+      <div className="flex items-center h-16 px-2">
         <button 
           onClick={onToggle}
           className={`flex items-center w-full hover:bg-gray-50 rounded-lg p-2 transition-colors ${
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
       </nav>
 
       {/* Bottom Section */}
-      <div className="border-t border-gray-100 py-4">
+      <div className="py-4">
         <div className="space-y-2 px-2 mb-4">
           {bottomItems.map((item, index) => (
             <button
