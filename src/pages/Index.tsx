@@ -36,7 +36,7 @@ const Index = () => {
       views: 1685,
       userReports: 0,
       priority: 'medium' as const,
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
     },
     {
       id: '#99001',

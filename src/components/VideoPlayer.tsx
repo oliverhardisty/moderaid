@@ -30,7 +30,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   
-  // Convert URL to YouTube video ID or use default
+  // Convert URL to YouTube video ID, Google Drive embed, or use default
   const getVideoId = (url?: string) => {
     if (!url) return 'UDdy1vI_oiU'; // Default YouTube video
     
@@ -40,10 +40,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       return match ? match[1] : 'UDdy1vI_oiU';
     }
     
+    // For Google Drive URLs, extract file ID and return embed URL
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
+    
     return 'UDdy1vI_oiU'; // Default fallback
   };
 
-  const videoId = getVideoId(videoUrl);
+  const processedVideoUrl = getVideoId(videoUrl);
+  const isGoogleDrive = processedVideoUrl?.includes('drive.google.com');
+  const youtubeVideoId = isGoogleDrive ? null : processedVideoUrl;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -97,9 +107,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const initializePlayer = async () => {
     await loadYouTubeAPI();
     
-    if (playerContainerRef.current && videoId) {
+    if (playerContainerRef.current && youtubeVideoId) {
       playerRef.current = new window.YT.Player(playerContainerRef.current, {
-        videoId: videoId,
+        videoId: youtubeVideoId,
         width: '100%',
         height: '100%',
         playerVars: {
@@ -131,11 +141,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   useEffect(() => {
-    initializePlayer();
-  }, []);
+    if (!isGoogleDrive) {
+      initializePlayer();
+    }
+  }, [isGoogleDrive]);
 
   useEffect(() => {
-    if (isPlayerReady && playerRef.current) {
+    if (isPlayerReady && playerRef.current && !isGoogleDrive) {
       const updateTime = () => {
         const current = playerRef.current.getCurrentTime();
         const total = playerRef.current.getDuration();
@@ -151,11 +163,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
-        {/* YouTube Video Player Container */}
-        <div 
-          ref={playerContainerRef}
-          className="w-full h-full"
-        />
+        {/* Video Player Container */}
+        {isGoogleDrive ? (
+          // Google Drive iframe
+          <iframe
+            src={processedVideoUrl}
+            className="w-full h-full"
+            allowFullScreen
+            title="Google Drive Video"
+          />
+        ) : (
+          // YouTube Video Player Container
+          <div 
+            ref={playerContainerRef}
+            className="w-full h-full"
+          />
+        )}
 
         {/* Blur Overlay */}
         {isBlurred && (
