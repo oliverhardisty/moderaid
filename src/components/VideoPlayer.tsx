@@ -228,7 +228,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
          {/* Control Buttons */}
          <div className="flex items-center justify-between">
-           <div className="flex items-center gap-3 bg-primary text-primary-foreground px-4 py-2 rounded-lg">
+           <div className="flex items-center gap-3">
              {/* Play/Pause Button */}
              <button 
                onClick={handlePlayPause}
