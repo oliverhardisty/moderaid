@@ -273,7 +273,7 @@ const Index = () => {
         />
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
+        <div className="flex-1 flex flex-col pt-20 pb-20 overflow-hidden">
           {/* View Toggle */}
           <div className="px-4 pb-2 pt-2 flex justify-end items-center flex-shrink-0">
           <div className="inline-flex bg-gray-100 rounded-lg p-1">
