@@ -6,7 +6,7 @@ import { FlagsPanel } from '@/components/FlagsPanel';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
-import { ModerationTest } from '@/components/ModerationTest';
+
 import { useModeration } from '@/hooks/useModeration';
 
 const Index = () => {
@@ -244,8 +244,6 @@ const Index = () => {
               viewerReports={contentData.viewerReports}
             />
 
-            {/* Moderation API Test */}
-            <ModerationTest />
           </div>
         </div>
 
