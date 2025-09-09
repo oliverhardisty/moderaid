@@ -35,6 +35,7 @@ export const useContentItems = () => {
       user_reports: 12,
       priority: 'high',
       status: 'approved',
+      video_url: 'https://www.youtube.com/watch?v=YXHPQqmvJkI',
       created_at: '2024-03-12T00:00:00Z',
       updated_at: '2024-03-12T00:00:00Z'
     },
@@ -46,7 +47,7 @@ export const useContentItems = () => {
       user_reports: 8,
       priority: 'high',
       status: 'rejected',
-      video_url: 'https://example-video-host.com/videos/flagged-content-violence-debate-2024.mp4',
+      video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       created_at: '2024-01-11T00:00:00Z',
       updated_at: '2024-01-11T00:00:00Z'
     },
