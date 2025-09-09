@@ -19,9 +19,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   ];
 
   return (
-    <aside className={`flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
+    <aside className={`relative flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
       isExpanded ? 'w-64' : 'w-14'
     }`}>
+      {/* Expand/Collapse Button - Always on the right edge */}
+      <button
+        onClick={onToggle}
+        className="absolute -right-3 top-20 z-10 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+        title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        <ChevronRight className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
       {/* Header Section */}
       <div className="flex items-center h-16 px-2 border-b border-gray-100">
         <button 
@@ -62,17 +70,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
               )}
             </button>
           ))}
-          
-          {/* Expand Button - Only visible when collapsed */}
-          {!isExpanded && (
-            <button
-              onClick={onToggle}
-              className="w-full flex items-center justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors mt-4"
-              title="Expand sidebar"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          )}
         </div>
       </nav>
 
