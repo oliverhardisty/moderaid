@@ -8,7 +8,7 @@ import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import { Switch } from '@/components/ui/switch';
-import { Layout, PanelLeft } from 'lucide-react';
+import { Layout, RectangleHorizontal } from 'lucide-react';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -290,7 +290,7 @@ const Index = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <PanelLeft size={16} />
+              <RectangleHorizontal size={16} />
             </button>
           </div>
         </div>
