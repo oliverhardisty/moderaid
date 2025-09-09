@@ -10,10 +10,14 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  console.log('Azure moderation function called');
+
   try {
     const { text } = await req.json()
+    console.log('Received text for analysis:', text ? 'Text provided' : 'No text');
     
     if (!text) {
+      console.log('Error: No text provided');
       return new Response(
         JSON.stringify({ error: 'Text is required' }),
         { 
@@ -26,9 +30,18 @@ serve(async (req) => {
     const azureApiKey = Deno.env.get('AZURE_MODERATION_API_KEY')
     const azureEndpoint = Deno.env.get('AZURE_MODERATION_ENDPOINT')
     
+    console.log('Azure configuration check:', {
+      apiKey: azureApiKey ? 'Key found' : 'Key missing',
+      endpoint: azureEndpoint ? 'Endpoint found' : 'Endpoint missing'
+    });
+    
     if (!azureApiKey || !azureEndpoint) {
+      console.log('Error: Azure Content Safety API configuration missing');
       return new Response(
-        JSON.stringify({ error: 'Azure Content Safety API configuration missing' }),
+        JSON.stringify({ 
+          error: 'Azure Content Safety API configuration missing',
+          details: `Missing: ${!azureApiKey ? 'API_KEY ' : ''}${!azureEndpoint ? 'ENDPOINT' : ''}`
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -36,7 +49,10 @@ serve(async (req) => {
       )
     }
 
-    const response = await fetch(`${azureEndpoint}/contentsafety/text:analyze?api-version=2023-10-01`, {
+    const apiUrl = `${azureEndpoint}/contentsafety/text:analyze?api-version=2023-10-01`;
+    console.log('Making request to Azure API:', apiUrl);
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Ocp-Apim-Subscription-Key': azureApiKey,
@@ -50,11 +66,16 @@ serve(async (req) => {
       }),
     })
 
+    console.log('Azure API response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Azure API error: ${response.statusText}`)
+      const errorText = await response.text();
+      console.log('Azure API error:', response.status, errorText);
+      throw new Error(`Azure API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
     const data = await response.json()
+    console.log('Azure API response received successfully');
 
     // Format the response for consistency
     const categories = []
@@ -86,6 +107,8 @@ serve(async (req) => {
       rawResponse: data // Include raw response for debugging
     }
 
+    console.log('Moderation result:', { flagged: moderationResult.flagged, categoriesCount: moderationResult.categories.length });
+
     return new Response(
       JSON.stringify(moderationResult),
       { 
@@ -94,9 +117,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in Azure moderation:', error)
+    console.error('Error in Azure moderation:', error.message || error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

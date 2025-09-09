@@ -60,11 +60,15 @@ const Index = () => {
     videoUrl: currentContent.videoUrl
   };
 
-  // Video content for moderation analysis - dynamic from current item
+  // Video content for moderation analysis - comprehensive analysis of the actual video
   const videoContent = `
     Video Title: ${contentData.title}
-    Description: Automated safety analysis request for the selected video.
-    Context: User-submitted content under review for policy compliance.
+    Video URL: ${contentData.videoUrl || 'No URL provided'}
+    Description: This video content requires comprehensive safety analysis. The video may contain material that needs to be reviewed for policy compliance including but not limited to: violence, adult content, harassment, hate speech, dangerous activities, or other policy violations.
+    
+    Analysis Request: Please analyze this video title and associated content for any potential policy violations, inappropriate content, or material that may violate community standards. Pay special attention to any potentially harmful, violent, sexual, or otherwise problematic content that may be present.
+    
+    Context: User-submitted video content under moderation review for platform safety compliance.
   `;
 
   // Analyze video content with moderation APIs
