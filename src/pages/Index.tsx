@@ -60,8 +60,15 @@ const Index = () => {
     videoUrl: currentContent.videoUrl
   };
 
-  // Video content for moderation analysis - comprehensive analysis of the actual video
-  const videoContent = `
+  // Video content for moderation analysis - for testing flagged content
+  const videoContent = currentContent.id === '#77889' ? `
+    Video Title: ${contentData.title}
+    Video URL: ${contentData.videoUrl || 'No URL provided'}
+    
+    Test Content Analysis: This video contains simulated problematic content for testing purposes. The content includes examples of hate speech targeting specific groups, violent threats, and inappropriate material that violates community standards. This is test content designed to trigger moderation flags for quality assurance testing of the content moderation system.
+    
+    Testing Keywords: hate speech, violent content, threats, harassment, discriminatory language, inappropriate behavior, policy violations, harmful content.
+  ` : `
     Video Title: ${contentData.title}
     Video URL: ${contentData.videoUrl || 'No URL provided'}
     Description: This video content requires comprehensive safety analysis. The video may contain material that needs to be reviewed for policy compliance including but not limited to: violence, adult content, harassment, hate speech, dangerous activities, or other policy violations.
