@@ -182,7 +182,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         {/* Blur Overlay */}
         {isBlurred && (
-          <div className="absolute inset-0 bg-gray-900/90 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-lg flex items-center justify-center">
             <div className="text-center text-white p-8">
               <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
