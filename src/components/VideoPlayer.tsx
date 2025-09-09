@@ -232,9 +232,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 {isPlaying ? (
-                  <Pause className="w-8 h-8" fill="hsl(var(--primary))" />
+                  <Pause className="w-6 h-6" fill="hsl(var(--primary))" />
                 ) : (
-                  <Play className="w-8 h-8" fill="hsl(var(--primary))" />
+                  <Play className="w-6 h-6" fill="hsl(var(--primary))" />
                 )}
               </button>
 
