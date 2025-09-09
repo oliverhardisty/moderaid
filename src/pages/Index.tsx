@@ -36,7 +36,7 @@ const Index = () => {
       views: 1685,
       userReports: 0,
       priority: 'medium' as const,
-      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
+      videoUrl: 'https://www.youtube.com/watch?v=ysz5S6PUM-U'
     },
     {
       id: '#99001',
@@ -130,7 +130,32 @@ const Index = () => {
         });
       }
 
-      setModerationFlags(flags);
+      if (currentContent.id === '#77889') {
+        setModerationFlags([
+          {
+            id: "sim-hate-speech",
+            type: "Hate Speech",
+            status: "active" as const,
+            confidence: 96,
+            timestamp: new Date().toLocaleString(),
+            model: "Simulated QA",
+            description: "Simulated test flag: content classified as hate speech (for QA/testing only, no harmful content shown).",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
+          },
+          {
+            id: "sim-violence",
+            type: "Violence",
+            status: "active" as const,
+            confidence: 92,
+            timestamp: new Date().toLocaleString(),
+            model: "Simulated QA",
+            description: "Simulated test flag: unacceptable violent content (for QA/testing only).",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
+          }
+        ]);
+      } else {
+        setModerationFlags(flags);
+      }
     } catch (error) {
       console.error("Content analysis failed:", error);
       // Create demo flags to show the UI working
