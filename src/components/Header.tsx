@@ -6,9 +6,10 @@ interface HeaderProps {
   contentId: string;
   priority: 'high' | 'medium' | 'low';
   itemCount?: number;
+  sidebarExpanded?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount }) => {
+export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, sidebarExpanded = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -30,7 +31,9 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount }
   };
 
   return (
-    <header className="fixed top-0 left-14 right-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-50">
+    <header className={`fixed top-0 right-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-50 ${
+      sidebarExpanded ? 'left-64' : 'left-14'
+    }`}>
       {showBackButton && (
         <button 
           onClick={handleBack}
