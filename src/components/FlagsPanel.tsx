@@ -81,11 +81,14 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
             </span>
             {isAnalyzing ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-            ) : (
-              <Badge className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5">
-                {flags.length}
-              </Badge>
-            )}
+            ) : (() => {
+              const violatingFlags = flags.filter(flag => flag.status === 'active');
+              return violatingFlags.length > 0 ? (
+                <Badge className="bg-gray-100 text-black text-xs px-2 py-0.5">
+                  {violatingFlags.length}
+                </Badge>
+              ) : null;
+            })()}
           </div>
           <svg 
             className={`w-4 h-4 text-gray-400 transition-transform ${expandedSections.flags ? 'rotate-180' : ''}`}
