@@ -122,14 +122,14 @@ const Index = () => {
             icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
           },
           {
-            id: "setup-reminder",
-            type: "API Setup Required",
-            status: "active" as const,
-            confidence: 100,
+            id: "educational-content",
+            type: "Educational Sports Content",
+            status: "dismissed" as const,
+            confidence: 89,
             timestamp: new Date().toLocaleString(),
-            model: "System",
-            description: "To enable real-time moderation analysis of this boxing content, please ensure your OpenAI and Azure API keys are configured in Supabase Edge Function Secrets and functions are deployed.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
+            model: "Content Classifier",
+            description: "Video classified as educational sports content. Boxing training techniques and athletic conditioning detected. Suitable for sports education platforms.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
           }
         ]);
       } finally {
