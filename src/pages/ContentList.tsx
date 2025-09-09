@@ -92,6 +92,7 @@ const ContentList = () => {
           contentId="Content Management"
           priority="high"
           itemCount={filteredContent.length}
+          sidebarExpanded={sidebarExpanded}
         />
 
         {/* Content Area */}

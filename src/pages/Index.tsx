@@ -269,6 +269,7 @@ const Index = () => {
         <Header 
           contentId={contentData.id}
           priority={contentData.priority}
+          sidebarExpanded={sidebarExpanded}
         />
 
         {/* Scrollable Content Area */}
