@@ -245,9 +245,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   {volume > 0 ? (
-                    <Volume2 className="w-4 h-4" fill="hsl(var(--primary))" />
+                    <Volume2 className="w-6 h-6" fill="hsl(var(--primary))" />
                   ) : (
-                    <VolumeX className="w-4 h-4" fill="hsl(var(--primary))" />
+                    <VolumeX className="w-6 h-6" fill="hsl(var(--primary))" />
                   )}
                 </button>
                <div className="w-16 bg-gray-300 rounded-full h-1 cursor-pointer"
