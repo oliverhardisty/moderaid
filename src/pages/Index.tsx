@@ -19,21 +19,21 @@ const Index = () => {
 
   // Mock data
   const contentData = {
-    id: '#67890',
-    priority: 'high' as const,
-    title: 'Adult Content Video - Flagged for Review',
-    uploadDate: '15/01/2024',
+    id: "#67890",
+    priority: "high" as const,
+    title: "Boxing Training Video - Flagged for Review",
+    uploadDate: "15/01/2024",
     views: 2156,
     viewerReports: 8,
   };
 
   // Video content for moderation analysis
   const videoContent = `
-    Video Title: Rick Astley - Never Gonna Give You Up (Official Music Video)
-    Description: The official video for "Never Gonna Give You Up" by Rick Astley. 
-    A classic 1980s pop song with romantic lyrics about commitment and love.
-    Contains themes of: romance, commitment, relationships, 1980s music culture.
-    No explicit content, violence, or inappropriate material detected.
+    Video Title: Boxing Training and Sparring Session
+    Description: Professional boxing training footage featuring sparring, heavy bag work, and conditioning exercises.
+    Contains themes of: combat sports, athletic training, physical competition, boxing techniques.
+    Content may include: physical contact sport, competitive fighting in controlled environment.
+    Context: Educational/training content for boxing enthusiasts and athletes.
   `;
 
   // Analyze video content with moderation APIs
@@ -85,41 +85,51 @@ const Index = () => {
         // If no flags, add a clean content flag
         if (flags.length === 0) {
           flags.push({
-            id: 'clean-content',
-            type: 'Content Analysis Complete',
-            status: 'dismissed' as const,
-            confidence: 95,
+            id: "clean-boxing-content",
+            type: "Athletic Content Approved",
+            status: "dismissed" as const,
+            confidence: 94,
             timestamp: new Date().toLocaleString(),
-            model: 'Combined AI Analysis',
-            description: 'Content analyzed by both OpenAI and Azure APIs. No policy violations detected. Safe for general audiences.',
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+            model: "Combined AI Analysis", 
+            description: "Boxing training video analyzed by both OpenAI and Azure APIs. Content classified as legitimate athletic/educational material. No policy violations detected.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
           });
         }
 
         setModerationFlags(flags);
       } catch (error) {
-        console.error('Content analysis failed:', error);
+        console.error("Content analysis failed:", error);
         // Create demo flags to show the UI working
         setModerationFlags([
           {
-            id: 'demo-analysis',
-            type: 'Content Analysis Complete',
-            status: 'dismissed' as const,
-            confidence: 95,
+            id: "demo-analysis",
+            type: "Combat Sports Content",
+            status: "dismissed" as const,
+            confidence: 87,
             timestamp: new Date().toLocaleString(),
-            model: 'Demo Analysis',
-            description: 'Demo mode: This video appears to be "Never Gonna Give You Up" by Rick Astley - a clean, family-friendly music video with no content policy violations detected.',
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+            model: "Demo Analysis",
+            description: "Demo mode: Boxing training video detected. Content shows controlled sparring and training exercises within professional athletic context. Educational sports content approved.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
           },
           {
-            id: 'setup-reminder',
-            type: 'API Setup Required',
-            status: 'active' as const,
+            id: "violence-check",
+            type: "Violence Assessment", 
+            status: "dismissed" as const,
+            confidence: 92,
+            timestamp: new Date().toLocaleString(),
+            model: "Demo Analysis",
+            description: "Physical contact detected but classified as legitimate athletic competition. Boxing training falls within acceptable sports content guidelines.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
+          },
+          {
+            id: "setup-reminder",
+            type: "API Setup Required",
+            status: "active" as const,
             confidence: 100,
             timestamp: new Date().toLocaleString(),
-            model: 'System',
-            description: 'To enable real-time moderation analysis, please ensure your OpenAI and Azure API keys are configured in Supabase Edge Function Secrets and functions are deployed.',
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
+            model: "System",
+            description: "To enable real-time moderation analysis of this boxing content, please ensure your OpenAI and Azure API keys are configured in Supabase Edge Function Secrets and functions are deployed.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
           }
         ]);
       } finally {
