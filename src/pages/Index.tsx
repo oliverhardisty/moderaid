@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { FlagsPanel } from '@/components/FlagsPanel';
@@ -6,11 +6,16 @@ import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
 import { ModerationTest } from '@/components/ModerationTest';
+import { useModeration } from '@/hooks/useModeration';
 
 const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [moderationFlags, setModerationFlags] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  
+  const { moderateWithBoth } = useModeration();
 
   // Mock data
   const contentData = {
@@ -22,38 +27,93 @@ const Index = () => {
     viewerReports: 8,
   };
 
-  const flagsData = [
-    {
-      id: '1',
-      type: 'Adult Content',
-      status: 'active' as const,
-      confidence: 92,
-      timestamp: '15/01/2024, 09:15:00',
-      model: 'Vision AI v2.1',
-      description: 'High confidence detection of adult/mature content based on visual analysis',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
-    },
-    {
-      id: '2',
-      type: 'Spam Detection',
-      status: 'active' as const,
-      confidence: 78,
-      timestamp: '15/01/2024, 09:16:00',
-      model: 'Content Classifier v1.8',
-      description: 'Content pattern matches known spam characteristics',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-    },
-    {
-      id: '3',
-      type: 'Violence Detection',
-      status: 'dismissed' as const,
-      confidence: 34,
-      timestamp: '15/01/2024, 09:17:00',
-      model: 'Safety Detector v3.0',
-      description: 'Low confidence detection - likely false positive',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-    }
-  ];
+  // Video content for moderation analysis
+  const videoContent = `
+    Video Title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+    Description: The official video for "Never Gonna Give You Up" by Rick Astley. 
+    A classic 1980s pop song with romantic lyrics about commitment and love.
+    Contains themes of: romance, commitment, relationships, 1980s music culture.
+    No explicit content, violence, or inappropriate material detected.
+  `;
+
+  // Analyze video content with moderation APIs
+  useEffect(() => {
+    const analyzeContent = async () => {
+      setIsAnalyzing(true);
+      try {
+        const results = await moderateWithBoth(videoContent);
+        
+        const flags = [];
+        
+        // Create flags based on OpenAI results
+        if (results.openai.flagged) {
+          results.openai.categories.forEach((category, index) => {
+            const score = results.openai.categoryScores[category] || 0;
+            flags.push({
+              id: `openai-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'OpenAI Moderation API',
+              description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
+            });
+          });
+        }
+
+        // Create flags based on Azure results  
+        if (results.azure.flagged) {
+          results.azure.categories.forEach((category, index) => {
+            const score = results.azure.categoryScores[category] || 0;
+            flags.push({
+              id: `azure-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'Azure Content Safety',
+              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            });
+          });
+        }
+
+        // If no flags, add a clean content flag
+        if (flags.length === 0) {
+          flags.push({
+            id: 'clean-content',
+            type: 'Content Analysis Complete',
+            status: 'dismissed' as const,
+            confidence: 95,
+            timestamp: new Date().toLocaleString(),
+            model: 'Combined AI Analysis',
+            description: 'Content analyzed by both OpenAI and Azure APIs. No policy violations detected. Safe for general audiences.',
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+          });
+        }
+
+        setModerationFlags(flags);
+      } catch (error) {
+        console.error('Content analysis failed:', error);
+        // Fallback flag for API errors
+        setModerationFlags([{
+          id: 'analysis-error',
+          type: 'Analysis Error',
+          status: 'active' as const,
+          confidence: 0,
+          timestamp: new Date().toLocaleString(),
+          model: 'System',
+          description: 'Unable to complete automated content analysis. Manual review required.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
+        }]);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    analyzeContent();
+  }, []);
 
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
@@ -131,10 +191,11 @@ const Index = () => {
           {/* Left Panel - Flags and Reports */}
           <div className="w-80 flex-shrink-0">
             <FlagsPanel 
-              flags={flagsData}
+              flags={moderationFlags}
               userReports={3}
               uploaderStatus="good"
               moderationHistory={3}
+              isAnalyzing={isAnalyzing}
             />
           </div>
 
