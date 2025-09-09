@@ -304,7 +304,7 @@ const Index = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 px-4 pb-4">
           <PanelGroup direction="horizontal" className="h-full">
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
