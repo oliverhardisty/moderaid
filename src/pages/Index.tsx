@@ -273,17 +273,22 @@ const Index = () => {
         <div className="px-4 pb-2 border-b border-gray-200 flex justify-end items-center">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Monitor size={16} />
-              <span>Normal</span>
+              {isCompactView ? (
+                <>
+                  <Layout size={16} />
+                  <span>Compact</span>
+                </>
+              ) : (
+                <>
+                  <Monitor size={16} />
+                  <span>Normal</span>
+                </>
+              )}
             </div>
             <Switch 
               checked={isCompactView}
               onCheckedChange={toggleCompactView}
             />
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Layout size={16} />
-              <span>Compact</span>
-            </div>
           </div>
         </div>
 
