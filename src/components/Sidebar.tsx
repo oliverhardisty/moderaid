@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Zap, Shield, Settings, Bell, ChevronRight } from 'lucide-react';
+import { FileText, Zap, Shield, Settings, Bell, ChevronRight, Menu } from 'lucide-react';
 
 interface SidebarProps {
   isExpanded: boolean;
@@ -62,6 +62,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
               )}
             </button>
           ))}
+          
+          {/* Expand Button - Only visible when collapsed */}
+          {!isExpanded && (
+            <button
+              onClick={onToggle}
+              className="w-full flex items-center justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors mt-4"
+              title="Expand sidebar"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </nav>
 
