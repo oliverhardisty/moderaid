@@ -21,11 +21,11 @@ const Index = () => {
 
   // Mock data - in real app, this would be fetched based on contentId
   const contentData = {
-    id: contentId || "#67890",
+    id: contentId ? `#${contentId}` : "#67890", // Add # back for display
     priority: "high" as const,
-    title: contentId === "#67890" ? "Boxing Training Video - Flagged for Review" : 
-           contentId === "#77889" ? "Cooking Tutorial - Italian Pasta" :
-           contentId === "#99001" ? "DIY Home Improvement Tips" :
+    title: contentId === "67890" ? "Boxing Training Video - Flagged for Review" : 
+           contentId === "77889" ? "Cooking Tutorial - Italian Pasta" :
+           contentId === "99001" ? "DIY Home Improvement Tips" :
            "Content Item - Under Review",
     uploadDate: "15/01/2024",
     views: 2156,

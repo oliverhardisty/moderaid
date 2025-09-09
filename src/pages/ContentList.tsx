@@ -144,7 +144,9 @@ const ContentList = () => {
   };
 
   const handleContentClick = (contentId: string) => {
-    navigate(`/content/${contentId}`);
+    // Remove the # symbol and navigate with the clean ID
+    const cleanId = contentId.replace('#', '');
+    navigate(`/content/${cleanId}`);
   };
 
   const handleSidebarToggle = () => {
