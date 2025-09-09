@@ -33,16 +33,18 @@ export const useModeration = (): ModerationHook => {
     setError(null);
 
     try {
-      const response = await fetch('/functions/v1/moderate-openai', {
+      // Use Supabase function URL
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderate-openai`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ text }),
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI moderation failed: ${response.statusText}`);
+        throw new Error(`OpenAI moderation failed: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -61,16 +63,18 @@ export const useModeration = (): ModerationHook => {
     setError(null);
 
     try {
-      const response = await fetch('/functions/v1/moderate-azure', {
+      // Use Supabase function URL
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderate-azure`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ text }),
       });
 
       if (!response.ok) {
-        throw new Error(`Azure moderation failed: ${response.statusText}`);
+        throw new Error(`Azure moderation failed: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
