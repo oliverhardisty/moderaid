@@ -8,7 +8,7 @@ import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import { Switch } from '@/components/ui/switch';
-import { LayoutGrid, PanelLeftClose } from 'lucide-react';
+import { LayoutGrid, List } from 'lucide-react';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -271,18 +271,27 @@ const Index = () => {
 
         {/* View Toggle */}
         <div className="px-4 pb-2 pt-4 border-b border-gray-200 flex justify-end items-center">
-          <div className="flex items-center gap-3">
-            <div className="text-gray-500">
-              {isCompactView ? (
-                <PanelLeftClose size={18} />
-              ) : (
-                <LayoutGrid size={18} />
-              )}
-            </div>
-            <Switch 
-              checked={isCompactView}
-              onCheckedChange={toggleCompactView}
-            />
+          <div className="inline-flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => !isCompactView || toggleCompactView()}
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${
+                !isCompactView 
+                  ? 'bg-white shadow-sm text-gray-900' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => isCompactView || toggleCompactView()}
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${
+                isCompactView 
+                  ? 'bg-white shadow-sm text-gray-900' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <List size={16} />
+            </button>
           </div>
         </div>
 
