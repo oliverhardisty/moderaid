@@ -46,7 +46,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         <button
           onClick={onEscalate}
           disabled={disabled}
-          className="flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
+          className="flex items-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center"
           aria-label="Escalate content for further review"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
