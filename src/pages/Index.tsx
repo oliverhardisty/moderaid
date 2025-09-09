@@ -6,6 +6,7 @@ import { FlagsPanel } from '@/components/FlagsPanel';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -248,36 +249,45 @@ const Index = () => {
         />
 
         {/* Content Area */}
-        <div className="flex-1 flex gap-4 p-4">
-          {/* Left Panel - Flags and Reports */}
-          <div className="w-80 flex-shrink-0">
-            <FlagsPanel 
-              flags={moderationFlags}
-              userReports={3}
-              uploaderStatus="good"
-              moderationHistory={3}
-              isAnalyzing={isAnalyzing}
-              onRunAnalysis={analyzeContent}
-            />
-          </div>
-
-          {/* Right Panel - Video Player and Metadata */}
-          <div className="flex-1 flex flex-col gap-4">
-            <VideoPlayer 
-              isBlurred={isContentBlurred}
-              onUnblur={handleUnblur}
-              onReportIssue={handleReportIssue}
-              videoUrl={contentData.videoUrl}
-            />
+        <div className="flex-1 p-4">
+          <PanelGroup direction="horizontal" className="h-full">
+            {/* Left Panel - Flags and Reports */}
+            <Panel defaultSize={30} minSize={20} maxSize={50}>
+              <div className="h-full">
+                <FlagsPanel 
+                  flags={moderationFlags}
+                  userReports={3}
+                  uploaderStatus="good"
+                  moderationHistory={3}
+                  isAnalyzing={isAnalyzing}
+                  onRunAnalysis={analyzeContent}
+                />
+              </div>
+            </Panel>
             
-            <ContentMetadata 
-              title={contentData.title}
-              uploadDate={contentData.uploadDate}
-              views={contentData.views}
-              viewerReports={contentData.viewerReports}
-            />
+            <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-gray-300 transition-colors cursor-col-resize flex items-center justify-center">
+              <div className="w-1 h-8 bg-gray-400 rounded-full"></div>
+            </PanelResizeHandle>
 
-          </div>
+            {/* Right Panel - Video Player and Metadata */}
+            <Panel defaultSize={70} minSize={40}>
+              <div className="flex flex-col gap-4 h-full pl-4">
+                <VideoPlayer 
+                  isBlurred={isContentBlurred}
+                  onUnblur={handleUnblur}
+                  onReportIssue={handleReportIssue}
+                  videoUrl={contentData.videoUrl}
+                />
+                
+                <ContentMetadata 
+                  title={contentData.title}
+                  uploadDate={contentData.uploadDate}
+                  views={contentData.views}
+                  viewerReports={contentData.viewerReports}
+                />
+              </div>
+            </Panel>
+          </PanelGroup>
         </div>
 
         {/* Action Bar */}
