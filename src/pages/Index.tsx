@@ -36,7 +36,7 @@ const Index = () => {
       views: 1685,
       userReports: 0,
       priority: 'medium' as const,
-      videoUrl: 'https://www.youtube.com/watch?v=ysz5S6PUM-U'
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     },
     {
       id: '#99001',
@@ -158,39 +158,46 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Content analysis failed:", error);
-      // Create demo flags to show the UI working
-      setModerationFlags([
-        {
-          id: "demo-analysis",
-          type: "Hockey Sports Content",
-          status: "dismissed" as const,
-          confidence: 85,
-          timestamp: new Date().toLocaleString(),
-          model: "Demo Analysis",
-          description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
-          icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
-        },
-        {
-          id: "violence-check",
-          type: "Violence Assessment", 
-          status: "dismissed" as const,
-          confidence: 91,
-          timestamp: new Date().toLocaleString(),
-          model: "Demo Analysis",
-          description: "Physical altercations detected but classified as legitimate competitive sports content. NHL fighting is within acceptable sports entertainment guidelines.",
-          icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-        },
-        {
-          id: "sports-content",
-          type: "Professional Sports Content",
-          status: "dismissed" as const,
-          confidence: 93,
-          timestamp: new Date().toLocaleString(),
-          model: "Content Classifier",
-          description: "Video classified as professional sports compilation. Hockey fight highlights detected. Suitable for sports entertainment platforms.",
-          icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-        }
-      ]);
+      
+      // For content #77889, show simulated dangerous flags
+      if (currentContent.id === '#77889') {
+        setModerationFlags([
+          {
+            id: "sim-hate-speech",
+            type: "Hate Speech",
+            status: "active" as const,
+            confidence: 96,
+            timestamp: new Date().toLocaleString(),
+            model: "Simulated QA",
+            description: "Simulated test flag: content classified as hate speech (for QA/testing only, no harmful content shown).",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
+          },
+          {
+            id: "sim-violence",
+            type: "Violence",
+            status: "active" as const,
+            confidence: 92,
+            timestamp: new Date().toLocaleString(),
+            model: "Simulated QA",
+            description: "Simulated test flag: unacceptable violent content (for QA/testing only).",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
+          }
+        ]);
+      } else {
+        // Create demo flags to show the UI working for other content
+        setModerationFlags([
+          {
+            id: "demo-analysis",
+            type: "Hockey Sports Content",
+            status: "dismissed" as const,
+            confidence: 85,
+            timestamp: new Date().toLocaleString(),
+            model: "Demo Analysis",
+            description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
+            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+          }
+        ]);
+      }
     } finally {
       setIsAnalyzing(false);
     }
