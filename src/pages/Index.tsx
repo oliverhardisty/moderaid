@@ -8,7 +8,7 @@ import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import { Switch } from '@/components/ui/switch';
-import { Monitor, Layout } from 'lucide-react';
+import { LayoutGrid, PanelLeftClose } from 'lucide-react';
 
 import { useModeration } from '@/hooks/useModeration';
 
@@ -272,17 +272,11 @@ const Index = () => {
         {/* View Toggle */}
         <div className="px-4 pb-2 border-b border-gray-200 flex justify-end items-center">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="text-gray-500">
               {isCompactView ? (
-                <>
-                  <Layout size={16} />
-                  <span>Compact</span>
-                </>
+                <PanelLeftClose size={18} />
               ) : (
-                <>
-                  <Monitor size={16} />
-                  <span>Normal</span>
-                </>
+                <LayoutGrid size={18} />
               )}
             </div>
             <Switch 
