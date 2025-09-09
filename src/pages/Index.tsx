@@ -35,8 +35,7 @@ const Index = () => {
       uploadDate: 'Jan 11, 2024',
       views: 1685,
       userReports: 0,
-      priority: 'medium' as const,
-      videoUrl: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link'
+      priority: 'medium' as const
     },
     {
       id: '#99001',
@@ -57,7 +56,7 @@ const Index = () => {
     uploadDate: currentContent.uploadDate.replace(/(\w+)\s(\d+),\s(\d+)/, '$2/$1/$3'),
     views: currentContent.views,
     viewerReports: currentContent.userReports,
-    videoUrl: currentContent.videoUrl
+    videoUrl: (currentContent as any).videoUrl
   };
 
   // Video content for moderation analysis
