@@ -28,7 +28,7 @@ const Index = () => {
            contentId === "99001" ? "DIY Home Improvement Tips" :
            "Content Item - Under Review",
     uploadDate: contentId === "67890" ? "12/03/2024" : "15/01/2024",
-    views: contentId === "67890" ? 15781 : 2156,
+    views: contentId === "67890" ? 60324 : 2156,
     viewerReports: contentId === "67890" ? 12 : 8,
   };
 
