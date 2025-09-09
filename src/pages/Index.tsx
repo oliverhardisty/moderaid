@@ -269,8 +269,10 @@ const Index = () => {
           priority={contentData.priority}
         />
 
-        {/* View Toggle */}
-        <div className="px-4 pb-2 pt-2 flex justify-end items-center">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
+          {/* View Toggle */}
+          <div className="px-4 pb-2 pt-2 flex justify-end items-center flex-shrink-0">
           <div className="inline-flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => !isCompactView || toggleCompactView()}
@@ -301,9 +303,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 px-4 pb-4">
-          <PanelGroup direction="horizontal" className="h-full">
+          {/* Content Area */}
+          <div className="flex-1 px-4 pb-4 overflow-auto">
+            <PanelGroup direction="horizontal" className="h-full min-h-0">
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
@@ -341,6 +343,7 @@ const Index = () => {
               </div>
             </Panel>
           </PanelGroup>
+          </div>
         </div>
 
         {/* Action Bar */}
