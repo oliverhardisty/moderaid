@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { FlagsPanel } from '@/components/FlagsPanel';
@@ -9,6 +10,7 @@ import { ModerationTest } from '@/components/ModerationTest';
 import { useModeration } from '@/hooks/useModeration';
 
 const Index = () => {
+  const { contentId } = useParams();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,11 +19,14 @@ const Index = () => {
   
   const { moderateWithBoth } = useModeration();
 
-  // Mock data
+  // Mock data - in real app, this would be fetched based on contentId
   const contentData = {
-    id: "#67890",
+    id: contentId || "#67890",
     priority: "high" as const,
-    title: "Boxing Training Video - Flagged for Review",
+    title: contentId === "#67890" ? "Boxing Training Video - Flagged for Review" : 
+           contentId === "#77889" ? "Cooking Tutorial - Italian Pasta" :
+           contentId === "#99001" ? "DIY Home Improvement Tips" :
+           "Content Item - Under Review",
     uploadDate: "15/01/2024",
     views: 2156,
     viewerReports: 8,

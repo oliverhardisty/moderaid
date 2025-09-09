@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileText, Zap, Shield, Settings, Bell, ChevronRight, Menu } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isExpanded: boolean;
@@ -7,16 +8,38 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const navigationItems = [
-    { icon: FileText, label: 'Content', active: true },
-    { icon: Zap, label: 'Decisions', active: false },
-    { icon: Shield, label: 'Policies', active: false },
+    { 
+      icon: FileText, 
+      label: 'Content', 
+      path: '/',
+      active: location.pathname === '/' || location.pathname.startsWith('/content/')
+    },
+    { 
+      icon: Zap, 
+      label: 'Decisions', 
+      path: '/decisions',
+      active: location.pathname.startsWith('/decisions')
+    },
+    { 
+      icon: Shield, 
+      label: 'Policies', 
+      path: '/policies',
+      active: location.pathname.startsWith('/policies')
+    },
   ];
 
   const bottomItems = [
-    { icon: Settings, label: 'Settings' },
-    { icon: Bell, label: 'Notifications' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Bell, label: 'Notifications', path: '/notifications' },
   ];
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   return (
     <aside className={`relative flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 z-50 ${
@@ -56,6 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
           {navigationItems.map((item, index) => (
             <button
               key={index}
+              onClick={() => handleNavigation(item.path)}
               className={`w-full flex items-center rounded-lg transition-all duration-200 ${
                 isExpanded ? 'gap-3 px-3 py-2.5' : 'justify-center py-2.5'
               } ${
