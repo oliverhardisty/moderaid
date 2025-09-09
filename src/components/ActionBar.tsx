@@ -13,9 +13,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   disabled = false,
   sidebarExpanded = false
 }) => {
-  return <footer className={`fixed bottom-0 right-0 bg-white border-t border-gray-200 p-4 z-40 py-3 ${
-    sidebarExpanded ? 'left-64' : 'left-14'
-  }`}>
+  return <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40 py-3">
       <div className="flex justify-center gap-4">
         {/* Accept Button */}
         <button onClick={onAccept} disabled={disabled} className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px] justify-center" aria-label="Accept content">

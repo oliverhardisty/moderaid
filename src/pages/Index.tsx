@@ -262,12 +262,13 @@ const Index = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">
+      <main className={`flex-1 flex flex-col transition-all duration-300 ${
+        sidebarExpanded ? 'ml-64' : 'ml-14'
+      }`}>
         {/* Header */}
         <Header 
           contentId={contentData.id}
           priority={contentData.priority}
-          sidebarExpanded={sidebarExpanded}
         />
 
         {/* Scrollable Content Area */}
@@ -353,7 +354,6 @@ const Index = () => {
           onReject={handleReject}
           onEscalate={handleEscalate}
           disabled={isProcessing}
-          sidebarExpanded={sidebarExpanded}
         />
       </main>
     </div>
