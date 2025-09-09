@@ -40,12 +40,12 @@ export const useContentItems = () => {
     },
     {
       id: '#77889',
-      title: 'Cooking Tutorial - Italian Pasta',
+      title: 'Controversial Political Debate - Heated Arguments',
       upload_date: 'Jan 11, 2024',
       views: 1685,
-      user_reports: 0,
-      priority: 'medium',
-      status: 'approved',
+      user_reports: 8,
+      priority: 'high',
+      status: 'rejected',
       video_url: 'https://drive.google.com/file/d/1FHa53_DkdOHwgUvnvOwgMf-R6x5olz2a/view?usp=drive_link',
       created_at: '2024-01-11T00:00:00Z',
       updated_at: '2024-01-11T00:00:00Z'
