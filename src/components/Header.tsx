@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   contentId: string;
@@ -7,6 +8,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
+  const navigate = useNavigate();
+
   const handleCopy = () => {
     navigator.clipboard.writeText(contentId);
   };
@@ -17,8 +20,8 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
   };
 
   const handleBack = () => {
-    // Navigate back to queue
-    console.log('Back to queue');
+    // Navigate back to content list
+    navigate('/');
   };
 
   return (
