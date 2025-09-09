@@ -23,22 +23,22 @@ const Index = () => {
   const contentData = {
     id: contentId ? `#${contentId}` : "#67890", // Add # back for display
     priority: "high" as const,
-    title: contentId === "67890" ? "Boxing Training Video - Flagged for Review" : 
+    title: contentId === "67890" ? "NHL Greatest Fights Of All Time" : 
            contentId === "77889" ? "Cooking Tutorial - Italian Pasta" :
            contentId === "99001" ? "DIY Home Improvement Tips" :
            "Content Item - Under Review",
-    uploadDate: "15/01/2024",
-    views: 2156,
-    viewerReports: 8,
+    uploadDate: contentId === "67890" ? "12/03/2024" : "15/01/2024",
+    views: contentId === "67890" ? 15781 : 2156,
+    viewerReports: contentId === "67890" ? 12 : 8,
   };
 
-  // Video content for moderation analysis
+  // Video content for moderation analysis - updated for NHL fights video
   const videoContent = `
-    Video Title: Boxing Training and Sparring Session
-    Description: Professional boxing training footage featuring sparring, heavy bag work, and conditioning exercises.
-    Contains themes of: combat sports, athletic training, physical competition, boxing techniques.
-    Content may include: physical contact sport, competitive fighting in controlled environment.
-    Context: Educational/training content for boxing enthusiasts and athletes.
+    Video Title: NHL Greatest Fights Of All Time
+    Description: Compilation of the most intense and memorable fights in NHL hockey history.
+    Contains themes of: ice hockey, professional sports, physical altercations, competitive fighting.
+    Content may include: aggressive physical contact, fighting, competitive sports violence, athletic confrontations.
+    Context: Sports compilation highlighting physical aspects of professional hockey competition.
   `;
 
   // Analyze video content with moderation APIs
@@ -90,13 +90,13 @@ const Index = () => {
         // If no flags, add a clean content flag
         if (flags.length === 0) {
           flags.push({
-            id: "clean-boxing-content",
-            type: "Athletic Content Approved",
+            id: "clean-hockey-content",
+            type: "Sports Content Approved",
             status: "dismissed" as const,
-            confidence: 94,
+            confidence: 89,
             timestamp: new Date().toLocaleString(),
             model: "Combined AI Analysis", 
-            description: "Boxing training video analyzed by both OpenAI and Azure APIs. Content classified as legitimate athletic/educational material. No policy violations detected.",
+            description: "NHL hockey fights compilation analyzed by both OpenAI and Azure APIs. Content classified as legitimate sports entertainment. Physical contact within acceptable sports competition guidelines.",
             icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
           });
         }
@@ -108,32 +108,32 @@ const Index = () => {
         setModerationFlags([
           {
             id: "demo-analysis",
-            type: "Combat Sports Content",
+            type: "Hockey Sports Content",
             status: "dismissed" as const,
-            confidence: 87,
+            confidence: 85,
             timestamp: new Date().toLocaleString(),
             model: "Demo Analysis",
-            description: "Demo mode: Boxing training video detected. Content shows controlled sparring and training exercises within professional athletic context. Educational sports content approved.",
+            description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
             icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
           },
           {
             id: "violence-check",
             type: "Violence Assessment", 
             status: "dismissed" as const,
-            confidence: 92,
+            confidence: 91,
             timestamp: new Date().toLocaleString(),
             model: "Demo Analysis",
-            description: "Physical contact detected but classified as legitimate athletic competition. Boxing training falls within acceptable sports content guidelines.",
+            description: "Physical altercations detected but classified as legitimate competitive sports content. NHL fighting is within acceptable sports entertainment guidelines.",
             icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
           },
           {
-            id: "educational-content",
-            type: "Educational Sports Content",
+            id: "sports-content",
+            type: "Professional Sports Content",
             status: "dismissed" as const,
-            confidence: 89,
+            confidence: 93,
             timestamp: new Date().toLocaleString(),
             model: "Content Classifier",
-            description: "Video classified as educational sports content. Boxing training techniques and athletic conditioning detected. Suitable for sports education platforms.",
+            description: "Video classified as professional sports compilation. Hockey fight highlights detected. Suitable for sports entertainment platforms.",
             icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
           }
         ]);

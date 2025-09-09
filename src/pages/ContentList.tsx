@@ -34,10 +34,10 @@ const ContentList = () => {
   const contentItems: ContentItem[] = [
     {
       id: '#67890',
-      title: 'Adult Content Video - Flagged for Review',
-      uploadDate: 'Jan 15, 2024',
-      views: 2156,
-      userReports: 8,
+      title: 'NHL Greatest Fights Of All Time',
+      uploadDate: 'Mar 12, 2024',
+      views: 15781,
+      userReports: 12,
       priority: 'high'
     },
     {
