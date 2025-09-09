@@ -60,15 +60,8 @@ const Index = () => {
     videoUrl: currentContent.videoUrl
   };
 
-  // Video content for moderation analysis - for testing flagged content
-  const videoContent = currentContent.id === '#77889' ? `
-    Video Title: ${contentData.title}
-    Video URL: ${contentData.videoUrl || 'No URL provided'}
-    
-    Test Content Analysis: This video contains simulated problematic content for testing purposes. The content includes examples of hate speech targeting specific groups, violent threats, and inappropriate material that violates community standards. This is test content designed to trigger moderation flags for quality assurance testing of the content moderation system.
-    
-    Testing Keywords: hate speech, violent content, threats, harassment, discriminatory language, inappropriate behavior, policy violations, harmful content.
-  ` : `
+  // Video content for moderation analysis
+  const videoContent = `
     Video Title: ${contentData.title}
     Video URL: ${contentData.videoUrl || 'No URL provided'}
     Description: This video content requires comprehensive safety analysis. The video may contain material that needs to be reviewed for policy compliance including but not limited to: violence, adult content, harassment, hate speech, dangerous activities, or other policy violations.
@@ -146,85 +139,34 @@ const Index = () => {
       // If no flags, add a clean content flag
       if (flags.length === 0) {
         flags.push({
-          id: "clean-hockey-content",
-          type: "Sports Content Approved",
+          id: "clean-content",
+          type: "Content Approved",
           status: "dismissed" as const,
           confidence: 89,
           timestamp: new Date().toLocaleString(),
           model: "Combined AI Analysis", 
-          description: "NHL hockey fights compilation analyzed by both OpenAI and Azure APIs. Content classified as legitimate sports entertainment. Physical contact within acceptable sports competition guidelines.",
+          description: "Content analyzed by OpenAI, Azure, and Google Video Intelligence APIs. No policy violations detected.",
           icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
         });
       }
 
-      if (currentContent.id === '#77889') {
-        setModerationFlags([
-          {
-            id: "sim-hate-speech",
-            type: "Hate Speech",
-            status: "active" as const,
-            confidence: 96,
-            timestamp: new Date().toLocaleString(),
-            model: "Simulated QA",
-            description: "Simulated test flag: content classified as hate speech (for QA/testing only, no harmful content shown).",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-          },
-          {
-            id: "sim-violence",
-            type: "Violence",
-            status: "active" as const,
-            confidence: 92,
-            timestamp: new Date().toLocaleString(),
-            model: "Simulated QA",
-            description: "Simulated test flag: unacceptable violent content (for QA/testing only).",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
-          }
-        ]);
-      } else {
-        setModerationFlags(flags);
-      }
+      setModerationFlags(flags);
     } catch (error) {
       console.error("Content analysis failed:", error);
       
-      // For content #77889, show simulated dangerous flags
-      if (currentContent.id === '#77889') {
-        setModerationFlags([
-          {
-            id: "sim-hate-speech",
-            type: "Hate Speech",
-            status: "active" as const,
-            confidence: 96,
-            timestamp: new Date().toLocaleString(),
-            model: "Simulated QA",
-            description: "Simulated test flag: content classified as hate speech (for QA/testing only, no harmful content shown).",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-          },
-          {
-            id: "sim-violence",
-            type: "Violence",
-            status: "active" as const,
-            confidence: 92,
-            timestamp: new Date().toLocaleString(),
-            model: "Simulated QA",
-            description: "Simulated test flag: unacceptable violent content (for QA/testing only).",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true"
-          }
-        ]);
-      } else {
-        // Create demo flags to show the UI working for other content
-        setModerationFlags([
-          {
-            id: "demo-analysis",
-            type: "Hockey Sports Content",
-            status: "dismissed" as const,
-            confidence: 85,
-            timestamp: new Date().toLocaleString(),
-            model: "Demo Analysis",
-            description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
-          }
-        ]);
-      }
+      // Create demo flags to show the UI working
+      setModerationFlags([
+        {
+          id: "demo-analysis",
+          type: "Analysis Error",
+          status: "dismissed" as const,
+          confidence: 0,
+          timestamp: new Date().toLocaleString(),
+          model: "Error Handler",
+          description: "Content analysis failed. Using demo mode to show UI functionality.",
+          icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+        }
+      ]);
     } finally {
       setIsAnalyzing(false);
     }
