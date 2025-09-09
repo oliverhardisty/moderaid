@@ -270,7 +270,7 @@ const Index = () => {
         />
 
         {/* View Toggle */}
-        <div className="px-4 pb-2 pt-4 border-b border-gray-200 flex justify-end items-center">
+        <div className="px-4 pb-2 pt-2 border-b border-gray-200 flex justify-end items-center">
           <div className="inline-flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => !isCompactView || toggleCompactView()}
