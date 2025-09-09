@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   contentId: string;
@@ -9,6 +9,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Only show back button on content detail pages, not on content list
+  const showBackButton = location.pathname !== '/';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(contentId);
@@ -26,15 +30,19 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority }) => {
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-      <button 
-        onClick={handleBack}
-        className="flex items-center gap-2 text-sm text-gray-900 font-medium hover:bg-gray-50 px-2 py-1 rounded-md transition-colors"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Queue
-      </button>
+      {showBackButton && (
+        <button 
+          onClick={handleBack}
+          className="flex items-center gap-2 text-sm text-gray-900 font-medium hover:bg-gray-50 px-2 py-1 rounded-md transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Queue
+        </button>
+      )}
+      
+      {!showBackButton && <div />} {/* Spacer for content list page */}
 
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-bold text-gray-900">
