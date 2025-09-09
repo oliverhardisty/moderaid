@@ -71,107 +71,108 @@ const Index = () => {
     Context: User-submitted video content under moderation review for platform safety compliance.
   `;
 
-  // Analyze video content with moderation APIs
-  useEffect(() => {
-    const analyzeContent = async () => {
-      console.log('Starting content analysis...');
-      setIsAnalyzing(true);
-      try {
-        console.log('Calling moderation APIs with content:', videoContent);
-        const results = await moderateWithBoth(videoContent);
-        console.log('Moderation results received:', results);
-        
-        const flags = [];
-        
-        // Create flags based on OpenAI results
-        if (results.openai.flagged) {
-          results.openai.categories.forEach((category, index) => {
-            const score = results.openai.categoryScores[category] || 0;
-            flags.push({
-              id: `openai-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'OpenAI Moderation API',
-              description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
-            });
-          });
-        }
-
-        // Create flags based on Azure results  
-        if (results.azure.flagged) {
-          results.azure.categories.forEach((category, index) => {
-            const score = results.azure.categoryScores[category] || 0;
-            flags.push({
-              id: `azure-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'Azure Content Safety',
-              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-            });
-          });
-        }
-
-        // If no flags, add a clean content flag
-        if (flags.length === 0) {
+  // Function to analyze video content with moderation APIs
+  const analyzeContent = async () => {
+    console.log('Starting content analysis...');
+    setIsAnalyzing(true);
+    try {
+      console.log('Calling moderation APIs with content:', videoContent);
+      const results = await moderateWithBoth(videoContent);
+      console.log('Moderation results received:', results);
+      
+      const flags = [];
+      
+      // Create flags based on OpenAI results
+      if (results.openai.flagged) {
+        results.openai.categories.forEach((category, index) => {
+          const score = results.openai.categoryScores[category] || 0;
           flags.push({
-            id: "clean-hockey-content",
-            type: "Sports Content Approved",
-            status: "dismissed" as const,
-            confidence: 89,
+            id: `openai-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
             timestamp: new Date().toLocaleString(),
-            model: "Combined AI Analysis", 
-            description: "NHL hockey fights compilation analyzed by both OpenAI and Azure APIs. Content classified as legitimate sports entertainment. Physical contact within acceptable sports competition guidelines.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+            model: 'OpenAI Moderation API',
+            description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
           });
-        }
-
-        setModerationFlags(flags);
-      } catch (error) {
-        console.error("Content analysis failed:", error);
-        // Create demo flags to show the UI working
-        setModerationFlags([
-          {
-            id: "demo-analysis",
-            type: "Hockey Sports Content",
-            status: "dismissed" as const,
-            confidence: 85,
-            timestamp: new Date().toLocaleString(),
-            model: "Demo Analysis",
-            description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
-          },
-          {
-            id: "violence-check",
-            type: "Violence Assessment", 
-            status: "dismissed" as const,
-            confidence: 91,
-            timestamp: new Date().toLocaleString(),
-            model: "Demo Analysis",
-            description: "Physical altercations detected but classified as legitimate competitive sports content. NHL fighting is within acceptable sports entertainment guidelines.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-          },
-          {
-            id: "sports-content",
-            type: "Professional Sports Content",
-            status: "dismissed" as const,
-            confidence: 93,
-            timestamp: new Date().toLocaleString(),
-            model: "Content Classifier",
-            description: "Video classified as professional sports compilation. Hockey fight highlights detected. Suitable for sports entertainment platforms.",
-            icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
-          }
-        ]);
-      } finally {
-        setIsAnalyzing(false);
+        });
       }
-    };
 
+      // Create flags based on Azure results  
+      if (results.azure.flagged) {
+        results.azure.categories.forEach((category, index) => {
+          const score = results.azure.categoryScores[category] || 0;
+          flags.push({
+            id: `azure-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date().toLocaleString(),
+            model: 'Azure Content Safety',
+            description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+          });
+        });
+      }
+
+      // If no flags, add a clean content flag
+      if (flags.length === 0) {
+        flags.push({
+          id: "clean-hockey-content",
+          type: "Sports Content Approved",
+          status: "dismissed" as const,
+          confidence: 89,
+          timestamp: new Date().toLocaleString(),
+          model: "Combined AI Analysis", 
+          description: "NHL hockey fights compilation analyzed by both OpenAI and Azure APIs. Content classified as legitimate sports entertainment. Physical contact within acceptable sports competition guidelines.",
+          icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+        });
+      }
+
+      setModerationFlags(flags);
+    } catch (error) {
+      console.error("Content analysis failed:", error);
+      // Create demo flags to show the UI working
+      setModerationFlags([
+        {
+          id: "demo-analysis",
+          type: "Hockey Sports Content",
+          status: "dismissed" as const,
+          confidence: 85,
+          timestamp: new Date().toLocaleString(),
+          model: "Demo Analysis",
+          description: "Demo mode: NHL hockey fights compilation detected. Content shows professional sports altercations within competitive hockey context. Sports entertainment content approved.",
+          icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+        },
+        {
+          id: "violence-check",
+          type: "Violence Assessment", 
+          status: "dismissed" as const,
+          confidence: 91,
+          timestamp: new Date().toLocaleString(),
+          model: "Demo Analysis",
+          description: "Physical altercations detected but classified as legitimate competitive sports content. NHL fighting is within acceptable sports entertainment guidelines.",
+          icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
+        },
+        {
+          id: "sports-content",
+          type: "Professional Sports Content",
+          status: "dismissed" as const,
+          confidence: 93,
+          timestamp: new Date().toLocaleString(),
+          model: "Content Classifier",
+          description: "Video classified as professional sports compilation. Hockey fight highlights detected. Suitable for sports entertainment platforms.",
+          icon: "https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true"
+        }
+      ]);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Auto-analyze content on mount
+  useEffect(() => {
     analyzeContent();
   }, []);
 
@@ -256,6 +257,7 @@ const Index = () => {
               uploaderStatus="good"
               moderationHistory={3}
               isAnalyzing={isAnalyzing}
+              onRunAnalysis={analyzeContent}
             />
           </div>
 
