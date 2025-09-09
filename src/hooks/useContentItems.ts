@@ -46,7 +46,7 @@ export const useContentItems = () => {
       user_reports: 8,
       priority: 'high',
       status: 'rejected',
-      video_url: 'https://drive.google.com/file/d/1XYZ456_ControversialContent_FlaggedVideo/view?usp=drive_link',
+      video_url: 'https://example-video-host.com/videos/flagged-content-violence-debate-2024.mp4',
       created_at: '2024-01-11T00:00:00Z',
       updated_at: '2024-01-11T00:00:00Z'
     },
