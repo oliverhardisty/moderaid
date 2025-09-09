@@ -28,7 +28,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   
-  const videoId = '7vDiRln38Uk'; // Extract video ID from URL
+  const videoId = 'UDdy1vI_oiU'; // Extract video ID from URL
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
