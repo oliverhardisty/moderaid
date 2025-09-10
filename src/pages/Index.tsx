@@ -42,7 +42,7 @@ const Index = () => {
     views: 1685,
     userReports: 0,
     priority: 'medium' as const,
-    videoUrl: 'https://www.example.com/videos/violent-content-test.mp4'
+    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
   }, {
     id: '#99001',
     title: 'DIY Home Improvement Tips',
