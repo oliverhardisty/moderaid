@@ -85,7 +85,7 @@ const Index = () => {
     views: 562,
     userReports: 1,
     priority: 'low' as const,
-    videoUrl: 'https://www.youtube.com/watch?v=7vDiRln38Uk'
+    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/violence.mp4'
   }];
   const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
   const contentData = {
