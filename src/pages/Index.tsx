@@ -215,7 +215,7 @@ const Index = () => {
       const activeFlags = flags.filter(f => f.status === 'active').length;
       toast({
         title: "Analysis Complete",
-        description: `Found ${activeFlags} flags for "${contentData.title}" using Google`
+        description: `Found ${activeFlags} flags for "${contentData.title}" using Google and Azure`
       });
     } catch (error: any) {
       console.error('Content analysis failed:', error);
@@ -258,26 +258,7 @@ const Index = () => {
     });
   };
 
-  // Test Azure API
-  const testAzureAPI = async () => {
-    try {
-      console.log('Testing Azure API...');
-      toast({ title: "Testing Azure API", description: "Checking Azure Content Safety configuration..." });
-      const result = await moderateWithAzure("This is a test message for Azure moderation.");
-      console.log('Azure test result:', result);
-      toast({
-        title: "Azure API Test Successful", 
-        description: `Provider: ${result.provider}, Flagged: ${result.flagged}`
-      });
-    } catch (error) {
-      console.error('Azure test failed:', error);
-      toast({
-        title: "Azure API Test Failed",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive"
-      });
-    }
-  };
+  // Test Azure API - removed as per user request
 
   // Handle local file selection -> upload to Supabase then analyze
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -507,7 +488,7 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} onTestAzure={testAzureAPI} />
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} />
               </div>
             </Panel>
             
