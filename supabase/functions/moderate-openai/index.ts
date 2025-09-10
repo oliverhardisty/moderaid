@@ -42,6 +42,18 @@ serve(async (req) => {
       )
     }
 
+    // Validate API key format
+    if (!openaiApiKey.startsWith('sk-')) {
+      console.log('Error: Invalid OpenAI API key format');
+      return new Response(
+        JSON.stringify({ error: 'Invalid OpenAI API key format' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     console.log('Making request to OpenAI API...');
     const response = await fetch('https://api.openai.com/v1/moderations', {
       method: 'POST',

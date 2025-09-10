@@ -49,7 +49,15 @@ serve(async (req) => {
       )
     }
 
-    const apiUrl = `${azureEndpoint}/contentsafety/text:analyze?api-version=2023-10-01`;
+    // Ensure endpoint is properly formatted URL
+    let cleanEndpoint = azureEndpoint;
+    if (!azureEndpoint.startsWith('https://')) {
+      cleanEndpoint = `https://${azureEndpoint}`;
+    }
+    // Remove trailing slash if present
+    cleanEndpoint = cleanEndpoint.replace(/\/$/, '');
+    
+    const apiUrl = `${cleanEndpoint}/contentsafety/text:analyze?api-version=2023-10-01`;
     console.log('Making request to Azure API:', apiUrl);
 
     const response = await fetch(apiUrl, {
