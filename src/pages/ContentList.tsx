@@ -46,11 +46,13 @@ const ContentList = () => {
   // Start automated moderation checks for all content items when page loads
   useEffect(() => {
     if (!loading && !prefetchStartedRef.current && contentItems.length > 0) {
+      console.log('Starting automated moderation for', contentItems.length, 'content items');
       prefetchStartedRef.current = true;
       
       // Start moderation for all items with video URLs
-      contentItems.forEach((item) => {
+      contentItems.forEach((item, index) => {
         if (item.video_url) {
+          console.log(`Starting moderation for item ${index + 1}:`, item.title, item.video_url);
           void moderateWithGoogleVideo(item.video_url);
         }
       });
