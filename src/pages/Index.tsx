@@ -254,7 +254,7 @@ const Index = () => {
   // Auto-analyze content on mount
   useEffect(() => {
     analyzeContent();
-  }, []);
+  }, [contentData.videoUrl]);
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
