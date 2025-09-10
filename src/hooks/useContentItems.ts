@@ -34,11 +34,28 @@ export const useContentItems = () => {
   const { toast } = useToast();
 
   const updateModerationResult = (itemId: string, status: 'analyzing' | 'completed' | 'failed', result?: any) => {
-    setContentItems(prev => prev.map(item => 
-      item.id === itemId 
-        ? { ...item, moderation_status: status, moderation_result: result }
-        : item
-    ));
+    setContentItems(prev => {
+      const updated = prev.map(item => 
+        item.id === itemId 
+          ? { ...item, moderation_status: status, moderation_result: result }
+          : item
+      );
+      
+      // Persist moderation results to localStorage
+      try {
+        const moderationResults = JSON.parse(localStorage.getItem('moderationResults') || '{}');
+        if (status === 'completed' && result) {
+          moderationResults[itemId] = { status, result };
+        } else {
+          moderationResults[itemId] = { status };
+        }
+        localStorage.setItem('moderationResults', JSON.stringify(moderationResults));
+      } catch (e) {
+        console.warn('Failed to save moderation results:', e);
+      }
+      
+      return updated;
+    });
   };
 
   // Mock data for demo purposes
@@ -123,10 +140,29 @@ export const useContentItems = () => {
         updated_at: item.updated_at,
       }));
 
+      // Load persisted moderation results
+      const moderationResults = JSON.parse(localStorage.getItem('moderationResults') || '{}');
+      
+      // Apply stored moderation results to all items
+      const applyStoredResults = (items: ContentItem[]) => {
+        return items.map(item => {
+          const storedResult = moderationResults[item.id];
+          if (storedResult) {
+            return {
+              ...item,
+              moderation_status: storedResult.status,
+              moderation_result: storedResult.result || undefined
+            };
+          }
+          return item;
+        });
+      };
+
       // Combine uploaded content with mock data
       // Put new uploads first, then mock data
       const combinedItems = [...transformedData, ...mockContentItems];
-      setContentItems(combinedItems);
+      const itemsWithStoredResults = applyStoredResults(combinedItems);
+      setContentItems(itemsWithStoredResults);
 
     } catch (err) {
       console.error('Fetch error:', err);

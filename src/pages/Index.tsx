@@ -310,7 +310,7 @@ const Index = () => {
     });
 
     if (!itemsLoading && currentContent) {
-      // Always use stored results if available and moderation is complete
+      // Check if we have stored results for this content
       if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
         console.log('Using stored moderation results for:', currentContent.id);
         const result = currentContent.moderation_result;

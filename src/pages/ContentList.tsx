@@ -51,13 +51,23 @@ const ContentList = () => {
     if (!loading && !prefetchStartedRef.current && contentItems.length > 0) {
       console.log('Starting automated moderation for', contentItems.length, 'content items');
       prefetchStartedRef.current = true;
-      setModerationInProgress(true);
       
-      const itemsWithVideos = contentItems.filter(item => item.video_url);
+      // Only run moderation on items that haven't been analyzed yet
+      const itemsNeedingModeration = contentItems.filter(item => 
+        item.video_url && 
+        (!item.moderation_status || item.moderation_status === 'pending')
+      );
+      
+      if (itemsNeedingModeration.length === 0) {
+        console.log('All items already have moderation results, skipping automated checks');
+        return;
+      }
+      
+      setModerationInProgress(true);
       let completedChecks = 0;
       
-      // Start moderation for all items with video URLs
-      itemsWithVideos.forEach(async (item, index) => {
+      // Start moderation for items that need it
+      itemsNeedingModeration.forEach(async (item, index) => {
         console.log(`Starting moderation for item ${index + 1}:`, item.title, item.video_url);
         updateModerationResult(item.id, 'analyzing');
         
@@ -70,7 +80,7 @@ const ContentList = () => {
           updateModerationResult(item.id, 'failed');
         } finally {
           completedChecks++;
-          if (completedChecks === itemsWithVideos.length) {
+          if (completedChecks === itemsNeedingModeration.length) {
             setModerationInProgress(false);
             console.log('All automated moderation checks completed');
           }
