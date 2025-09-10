@@ -54,7 +54,7 @@ const Index = () => {
     views: 562,
     userReports: 1,
     priority: 'low' as const,
-    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
+    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
   }];
   const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
   const contentData = {
