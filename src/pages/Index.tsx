@@ -37,7 +37,7 @@ const Index = () => {
     views: 15781,
     userReports: 12,
     priority: 'high' as const,
-    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
   }, {
     id: '#77889',
     title: 'Cooking Tutorial - Italian Pasta',
@@ -45,14 +45,15 @@ const Index = () => {
     views: 1685,
     userReports: 0,
     priority: 'medium' as const,
-    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
   }, {
     id: '#99001',
     title: 'DIY Home Improvement Tips',
     uploadDate: 'Jan 10, 2024',
     views: 562,
     userReports: 1,
-    priority: 'low' as const
+    priority: 'low' as const,
+    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
   }];
   const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
   const contentData = {
@@ -122,8 +123,20 @@ const Index = () => {
         title: "Analysis Complete",
         description: `Found ${flags.filter(f => f.status === 'active').length} flags for "${contentData.title}"`
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Content analysis failed:', error);
+      
+      let errorDescription = 'Unable to analyze content. Please confirm your Google Cloud API key and Video Intelligence API access.';
+      
+      // Handle specific error cases
+      if (error?.message?.includes('LOCALHOST_UNREACHABLE')) {
+        errorDescription = 'Cannot access localhost video URLs from server. Please upload video to public storage or use a publicly accessible URL.';
+      } else if (error?.message?.includes('404')) {
+        errorDescription = 'Video not found. Please check the video URL is correct and accessible.';
+      } else if (error?.message?.includes('403') || error?.message?.includes('unauthorized')) {
+        errorDescription = 'Google Cloud API key invalid or Video Intelligence API not enabled. Check your API configuration.';
+      }
+      
       setModerationFlags([
         {
           id: 'analysis-failed',
@@ -132,13 +145,13 @@ const Index = () => {
           confidence: 0,
           timestamp: new Date().toLocaleString(),
           model: 'Google Video Intelligence',
-          description: 'Unable to analyze content. Please confirm your Google Cloud API key and Video Intelligence API access.',
+          description: errorDescription,
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         }
       ]);
       toast({
         title: "Analysis Failed",
-        description: "Unable to analyze content. Check console for details.",
+        description: errorDescription,
         variant: "destructive"
       });
     } finally {
