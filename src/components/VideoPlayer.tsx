@@ -52,9 +52,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return 'UDdy1vI_oiU'; // Default fallback
   };
 
-  const processedVideoUrl = getVideoId(videoUrl);
-  const isGoogleDrive = processedVideoUrl?.includes('drive.google.com');
-  const youtubeVideoId = isGoogleDrive ? null : processedVideoUrl;
+  const isDirectMedia = !!videoUrl && /(\.mp4|\.webm|\.ogg)(\?|#|$)/i.test(videoUrl);
+  const processedVideoUrl = isDirectMedia ? (videoUrl as string) : getVideoId(videoUrl);
+  const isGoogleDrive = !isDirectMedia && processedVideoUrl?.includes('drive.google.com');
+  const youtubeVideoId = !isDirectMedia && !isGoogleDrive ? processedVideoUrl : null;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -142,10 +143,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   useEffect(() => {
-    if (!isGoogleDrive) {
+    if (!isGoogleDrive && !isDirectMedia) {
       initializePlayer();
     }
-  }, [isGoogleDrive]);
+  }, [isGoogleDrive, isDirectMedia, youtubeVideoId]);
 
   useEffect(() => {
     if (isPlayerReady && playerRef.current && !isGoogleDrive) {
@@ -172,6 +173,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             className="w-full h-full"
             allowFullScreen
             title="Google Drive Video"
+          />
+        ) : isDirectMedia ? (
+          // Direct media (MP4/WEBM/OGG)
+          <video
+            src={processedVideoUrl}
+            className="w-full h-full"
+            controls
+            preload="metadata"
           />
         ) : (
           // YouTube Video Player Container
@@ -205,8 +214,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       </div>
       
-       {/* Video Controls */}
-       <div className="bg-white p-4 space-y-2">
+       {!isDirectMedia && (
+         <>
+        {/* Video Controls */}
+        <div className="bg-white p-4 space-y-2">
          {/* Progress Bar */}
          <div className="w-full">
            <div className="w-full bg-gray-200 rounded-full h-1 cursor-pointer" 
@@ -298,7 +309,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
              </button>
            </div>
          </div>
-       </div>
+        </div>
+        </>
+       )}
+
      </div>
    );
  };
