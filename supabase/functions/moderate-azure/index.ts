@@ -13,13 +13,13 @@ serve(async (req) => {
   console.log('Azure moderation function called');
 
   try {
-    const { text } = await req.json()
-    console.log('Received text for analysis:', text ? 'Text provided' : 'No text');
+    const { content } = await req.json()
+    console.log('Received text for analysis:', content ? 'Text provided' : 'No text');
     
-    if (!text) {
-      console.log('Error: No text provided');
+    if (!content) {
+      console.log('Error: No content provided');
       return new Response(
-        JSON.stringify({ error: 'Text is required' }),
+        JSON.stringify({ error: 'Content is required' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -67,7 +67,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: text,
+        text: content,
         categories: ['Hate', 'SelfHarm', 'Sexual', 'Violence'],
         haltOnBlocklistHit: false,
         outputType: 'FourSeverityLevels'
