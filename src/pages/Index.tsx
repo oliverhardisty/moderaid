@@ -57,10 +57,7 @@ const Index = () => {
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const {
-    moderateWithGoogleVideo,
-    moderateWithAzure,
-  } = useModeration();
+  const { moderateWithGoogleVideo } = useModeration();
   
   const { contentItems, loading: itemsLoading } = useContentItems();
 
@@ -97,7 +94,7 @@ const Index = () => {
 
   // Function to analyze video content with moderation APIs
   const analyzeContent = async () => {
-    console.log('Starting content analysis (Google + Azure)...');
+    console.log('Starting content analysis (Google)...');
     setIsAnalyzing(true);
 
     try {
@@ -146,45 +143,14 @@ const Index = () => {
               confidence: 0,
               timestamp: new Date().toLocaleString(),
               model: 'Google Video Intelligence',
-              description: 'Google Video Intelligence analysis failed. Falling back to Azure.',
+              description: 'Google Video Intelligence analysis failed.',
               icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
             });
           }
         }
       }
 
-      // Try Azure Content Moderator on the video title and description
-      try {
-        const azureResult = await moderateWithAzure(videoContent);
-
-        if (azureResult?.flagged) {
-          azureResult.categories.forEach((category: string, index: number) => {
-            const score = azureResult.categoryScores?.[category] ?? 0;
-            flags.push({
-              id: `azure-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'Azure Content Moderator',
-              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-            });
-          });
-        }
-      } catch (azureError) {
-        console.warn('Azure Content Moderator failed:', azureError);
-        flags.push({
-          id: 'azure-failed',
-          type: 'Azure Analysis Failed',
-          status: 'dismissed' as const,
-          confidence: 0,
-          timestamp: new Date().toLocaleString(),
-          model: 'Azure Content Moderator',
-          description: 'Azure Content Moderator analysis failed.',
-          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-        });
-      }
+      // Azure moderation temporarily disabled per request
 
       // If no flags were generated, add a content approved flag
       if (flags.length === 0 || flags.every(f => f.status === 'dismissed')) {
@@ -204,12 +170,12 @@ const Index = () => {
       const activeFlags = flags.filter(f => f.status === 'active').length;
       toast({
         title: "Analysis Complete",
-        description: `Found ${activeFlags} flags for "${contentData.title}" using Google + Azure`
+        description: `Found ${activeFlags} flags for "${contentData.title}" using Google`
       });
     } catch (error: any) {
       console.error('Content analysis failed:', error);
       
-      let errorDescription = 'Unable to analyze content. Both Google and Azure APIs failed.';
+      let errorDescription = 'Unable to analyze content. Google API failed.';
       
       // Handle specific error cases
       if (error?.message?.includes('LOCALHOST_UNREACHABLE')) {
@@ -217,7 +183,7 @@ const Index = () => {
       } else if (error?.message?.includes('404')) {
         errorDescription = 'Video not found. Please check the video URL is correct and accessible.';
       } else if (error?.message?.includes('403') || error?.message?.includes('unauthorized')) {
-        errorDescription = 'API keys invalid or services not enabled. Check your Google Cloud and Azure configuration.';
+        errorDescription = 'API keys invalid or services not enabled. Check your Google Cloud configuration.';
       }
       
       setModerationFlags([
