@@ -38,29 +38,6 @@ export const useContentItems = () => {
       video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
       created_at: '2024-03-12T00:00:00Z',
       updated_at: '2024-03-12T00:00:00Z'
-    },
-    {
-      id: '#77889',
-      title: 'Controversial Political Debate - Heated Arguments',
-      upload_date: 'Jan 11, 2024',
-      views: 1685,
-      user_reports: 8,
-      priority: 'high',
-      status: 'rejected',
-      video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      created_at: '2024-01-11T00:00:00Z',
-      updated_at: '2024-01-11T00:00:00Z'
-    },
-    {
-      id: '#99001',
-      title: 'DIY Home Improvement Tips',
-      upload_date: 'Jan 10, 2024',
-      views: 562,
-      user_reports: 1,
-      priority: 'low',
-      status: 'pending',
-      created_at: '2024-01-10T00:00:00Z',
-      updated_at: '2024-01-10T00:00:00Z'
     }
   ];
 
