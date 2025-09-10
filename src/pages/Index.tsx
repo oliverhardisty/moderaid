@@ -18,7 +18,38 @@ const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [moderationFlags, setModerationFlags] = useState<any[]>([]);
+  const [moderationFlags, setModerationFlags] = useState<any[]>([
+    {
+      id: 'violence-detected',
+      type: 'Violence Detection',
+      status: 'active' as const,
+      confidence: 87,
+      timestamp: new Date().toLocaleString(),
+      model: 'Initial Analysis',
+      description: 'Hockey fight content detected - requires manual review',
+      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+    },
+    {
+      id: 'sports-violence',
+      type: 'Sports Violence',
+      status: 'active' as const,
+      confidence: 92,
+      timestamp: new Date().toLocaleString(),
+      model: 'Content Classifier',
+      description: 'Physical altercation in sports context detected',
+      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+    },
+    {
+      id: 'aggressive-behavior',
+      type: 'Aggressive Behavior',
+      status: 'active' as const,
+      confidence: 79,
+      timestamp: new Date().toLocaleString(),
+      model: 'Behavioral Analysis',
+      description: 'Multiple instances of aggressive physical contact',
+      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+    }
+  ]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
@@ -54,7 +85,7 @@ const Index = () => {
     views: 562,
     userReports: 1,
     priority: 'low' as const,
-    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
+    videoUrl: 'https://www.youtube.com/watch?v=7vDiRln38Uk'
   }];
   const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
   const contentData = {
