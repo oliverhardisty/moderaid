@@ -16,6 +16,7 @@ import { Search, Plus, Flag, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContentItems } from '@/hooks/useContentItems';
 import { useModeration } from '@/hooks/useModeration';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContentItem {
   id: string;
@@ -39,25 +40,44 @@ const ContentList = () => {
   const [viewsFilter, setViewsFilter] = useState('all');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
-  const { contentItems, loading, refetch } = useContentItems();
+  const { contentItems, loading, refetch, updateModerationResult } = useContentItems();
   const { moderateWithGoogleVideo } = useModeration();
   const prefetchStartedRef = useRef(false);
+  const [moderationInProgress, setModerationInProgress] = useState(false);
+  const { toast } = useToast();
 
   // Start automated moderation checks for all content items when page loads
   useEffect(() => {
     if (!loading && !prefetchStartedRef.current && contentItems.length > 0) {
       console.log('Starting automated moderation for', contentItems.length, 'content items');
       prefetchStartedRef.current = true;
+      setModerationInProgress(true);
+      
+      const itemsWithVideos = contentItems.filter(item => item.video_url);
+      let completedChecks = 0;
       
       // Start moderation for all items with video URLs
-      contentItems.forEach((item, index) => {
-        if (item.video_url) {
-          console.log(`Starting moderation for item ${index + 1}:`, item.title, item.video_url);
-          void moderateWithGoogleVideo(item.video_url);
+      itemsWithVideos.forEach(async (item, index) => {
+        console.log(`Starting moderation for item ${index + 1}:`, item.title, item.video_url);
+        updateModerationResult(item.id, 'analyzing');
+        
+        try {
+          const result = await moderateWithGoogleVideo(item.video_url!);
+          updateModerationResult(item.id, 'completed', result);
+          console.log(`Completed moderation for ${item.title}:`, result);
+        } catch (error) {
+          console.error(`Moderation failed for ${item.title}:`, error);
+          updateModerationResult(item.id, 'failed');
+        } finally {
+          completedChecks++;
+          if (completedChecks === itemsWithVideos.length) {
+            setModerationInProgress(false);
+            console.log('All automated moderation checks completed');
+          }
         }
       });
     }
-  }, [loading, contentItems, moderateWithGoogleVideo]);
+  }, [loading, contentItems, moderateWithGoogleVideo, updateModerationResult]);
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
@@ -73,6 +93,13 @@ const ContentList = () => {
   };
 
   const handleContentClick = (contentId: string) => {
+    if (moderationInProgress) {
+      toast({
+        title: "Analysis in progress",
+        description: "Please wait for automated moderation checks to complete before viewing content details.",
+      });
+      return;
+    }
     // Remove the # symbol and navigate with the clean ID
     const cleanId = contentId.replace('#', '');
     navigate(`/content/${cleanId}`);
@@ -234,9 +261,29 @@ const ContentList = () => {
                           {getPriorityBadge(item.priority)}
                         </td>
                         <td className="py-4 px-4">
-                          <Badge variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}>
-                            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}>
+                              {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                            </Badge>
+                            {item.moderation_status === 'analyzing' && (
+                              <div className="flex items-center gap-1">
+                                <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                <span className="text-xs text-blue-600">Analyzing</span>
+                              </div>
+                            )}
+                            {item.moderation_status === 'completed' && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-xs text-green-600">Checked</span>
+                              </div>
+                            )}
+                            {item.moderation_status === 'failed' && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <span className="text-xs text-red-600">Failed</span>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

@@ -299,12 +299,49 @@ const Index = () => {
     }
   };
 
-  // Auto-analyze when content is loaded and URL available
+  // Use stored moderation results if available, otherwise auto-analyze
   useEffect(() => {
-    if (!itemsLoading && contentData.videoUrl) {
+    if (!itemsLoading && currentContent?.moderation_result) {
+      // Use stored results from automated checks
+      const result = currentContent.moderation_result;
+      const flags: any[] = [];
+      
+      if (result.flagged) {
+        result.categories.forEach((category: string, index: number) => {
+          const score = result.categoryScores?.[category] ?? 0;
+          flags.push({
+            id: `google-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date(result.timestamp).toLocaleString(),
+            model: 'Google Video Intelligence',
+            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+          });
+        });
+      }
+      
+      if (flags.length === 0) {
+        flags.push({
+          id: 'content-approved',
+          type: 'Content Approved',
+          status: 'dismissed' as const,
+          confidence: 95,
+          timestamp: new Date(result.timestamp).toLocaleString(),
+          model: 'Google Video Intelligence',
+          description: 'No policy violations detected. Content passed all moderation checks.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+        });
+      }
+      
+      setModerationFlags(flags);
+      setIsAnalyzing(false);
+    } else if (!itemsLoading && contentData.videoUrl && (!currentContent?.moderation_result)) {
+      // Fall back to re-analyzing if no stored results
       analyzeContent();
     }
-  }, [itemsLoading, contentData.videoUrl]);
+  }, [itemsLoading, contentData.videoUrl, currentContent?.moderation_result]);
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
   };

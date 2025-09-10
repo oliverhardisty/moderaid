@@ -17,6 +17,14 @@ export interface ContentItem {
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
+  moderation_status?: 'pending' | 'analyzing' | 'completed' | 'failed';
+  moderation_result?: {
+    flagged: boolean;
+    categories: string[];
+    categoryScores: Record<string, number>;
+    provider: string;
+    timestamp: string;
+  };
 }
 
 export const useContentItems = () => {
@@ -24,6 +32,14 @@ export const useContentItems = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const updateModerationResult = (itemId: string, status: 'analyzing' | 'completed' | 'failed', result?: any) => {
+    setContentItems(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...item, moderation_status: status, moderation_result: result }
+        : item
+    ));
+  };
 
   // Mock data for demo purposes
   const mockContentItems: ContentItem[] = [
@@ -37,7 +53,8 @@ export const useContentItems = () => {
       status: 'approved',
       video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
       created_at: '2024-03-12T00:00:00Z',
-      updated_at: '2024-03-12T00:00:00Z'
+      updated_at: '2024-03-12T00:00:00Z',
+      moderation_status: 'pending'
     },
     {
       id: '#12345',
@@ -49,7 +66,8 @@ export const useContentItems = () => {
       status: 'pending',
       video_url: 'https://example.com/test-video-2.mp4',
       created_at: '2024-03-10T00:00:00Z',
-      updated_at: '2024-03-10T00:00:00Z'
+      updated_at: '2024-03-10T00:00:00Z',
+      moderation_status: 'pending'
     },
     {
       id: '#54321',
@@ -61,7 +79,8 @@ export const useContentItems = () => {
       status: 'approved',
       video_url: 'https://example.com/safe-video.mp4',
       created_at: '2024-03-08T00:00:00Z',
-      updated_at: '2024-03-08T00:00:00Z'
+      updated_at: '2024-03-08T00:00:00Z',
+      moderation_status: 'pending'
     }
   ];
 
@@ -127,5 +146,6 @@ export const useContentItems = () => {
     loading,
     error,
     refetch: fetchContentItems,
+    updateModerationResult,
   };
 };
