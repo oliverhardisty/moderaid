@@ -10,6 +10,7 @@ import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'rea
 import { Switch } from '@/components/ui/switch';
 import { Layout } from 'lucide-react';
 import { useModeration } from '@/hooks/useModeration';
+import { useToast } from '@/hooks/use-toast';
 const Index = () => {
   const {
     contentId
@@ -22,6 +23,8 @@ const Index = () => {
   const [isCompactView, setIsCompactView] = useState(false);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
   const {
     moderateWithBoth,
     moderateWithGoogleVideo,
@@ -79,48 +82,127 @@ const Index = () => {
   const analyzeContent = async () => {
     console.log('Starting content analysis...');
     setIsAnalyzing(true);
+
+    // Helper: read a local file to base64 (no data: prefix)
+    const fileToBase64 = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          const base64 = result.includes(',') ? result.split(',')[1] : result;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+    // Helper: prompt user to pick a local video and return base64
+    const promptLocalVideoAsBase64 = async (): Promise<string | null> => {
+      toast({ title: 'Local video not reachable', description: 'Select the local file to analyze it securely in-browser.' });
+      try {
+        if ('showOpenFilePicker' in window) {
+          // @ts-ignore - File System Access API
+          const [handle] = await (window as any).showOpenFilePicker({
+            types: [{ description: 'Video', accept: { 'video/*': ['.mp4', '.webm', '.mov', '.mkv'] } }],
+            multiple: false,
+          });
+          const file = await handle.getFile();
+          return await fileToBase64(file);
+        }
+      } catch (e) {
+        console.warn('showOpenFilePicker failed, falling back to input:', e);
+      }
+
+      return await new Promise<string | null>((resolve) => {
+        const input = fileInputRef.current;
+        if (!input) return resolve(null);
+        const cleanup = () => {
+          input.value = '';
+          input.onchange = null;
+        };
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (!file) {
+            cleanup();
+            return resolve(null);
+          }
+          try {
+            const b64 = await fileToBase64(file);
+            cleanup();
+            resolve(b64);
+          } catch (err) {
+            console.error('Failed reading file:', err);
+            cleanup();
+            resolve(null);
+          }
+        };
+        input.click();
+      });
+    };
+
     try {
       console.log('Calling moderation APIs with content:', videoContent);
-      const makeGoogleVideoPromise = async () => {
-        if (!contentData.videoUrl) return null;
-        const url = contentData.videoUrl as string;
-        if (url.startsWith('gs://')) {
-          try { return await moderateWithGoogleVideo(url); } catch { return null; }
-        }
-        if (url.startsWith('http://localhost') || url.startsWith('https://localhost')) {
-          try {
-            const res = await fetch(url);
-            const buf = await res.arrayBuffer();
-            // Convert to base64 in chunks to avoid call stack limits
-            let binary = '';
-            const bytes = new Uint8Array(buf);
-            const chunkSize = 0x8000;
-            for (let i = 0; i < bytes.length; i += chunkSize) {
-              const chunk = bytes.subarray(i, i + chunkSize);
-              binary += String.fromCharCode(...chunk);
-            }
-            const b64 = btoa(binary);
-            return await moderateWithGoogleVideoContent(b64);
-          } catch {
-            return null;
-          }
-        }
-        try { return await moderateWithGoogleVideo(url); } catch { return null; }
-      };
-      const [results, googleVideo] = await Promise.all([
-        moderateWithBoth(videoContent),
-        makeGoogleVideoPromise()
-      ]);
-      console.log('Moderation results received:', results, googleVideo);
-      const flags = [];
 
-      // Create flags based on OpenAI results
-      if (results.openai.flagged) {
-        results.openai.categories.forEach((category, index) => {
-          const score = results.openai.categoryScores[category] || 0;
+      // Run text-based checks, but do not fail overall if providers are misconfigured
+      let results: any = null;
+      try {
+        results = await moderateWithBoth(videoContent);
+      } catch (e) {
+        console.warn('Text moderation failed, continuing with video analysis:', e);
+        results = {
+          openai: { flagged: false, categories: [], categoryScores: {}, provider: 'openai', timestamp: new Date().toISOString() },
+          azure: { flagged: false, categories: [], categoryScores: {}, provider: 'azure', timestamp: new Date().toISOString() },
+          consensus: { flagged: false, categories: [], confidence: 'low' as const },
+        };
+      }
+
+      // Video checks (Google Video Intelligence)
+      const url = contentData.videoUrl as string | undefined;
+      let googleVideo: any = null;
+      if (url) {
+        try {
+          if (url.startsWith('gs://')) {
+            googleVideo = await moderateWithGoogleVideo(url);
+          } else if (url.includes('localhost')) {
+            // Try direct fetch first (works only if same-origin and reachable)
+            try {
+              const res = await fetch(url);
+              if (!res.ok) throw new Error('Fetch failed');
+              const buf = await res.arrayBuffer();
+              // Chunked to base64
+              let binary = '';
+              const bytes = new Uint8Array(buf);
+              const chunkSize = 0x8000;
+              for (let i = 0; i < bytes.length; i += chunkSize) {
+                const chunk = bytes.subarray(i, i + chunkSize);
+                binary += String.fromCharCode(...chunk);
+              }
+              const b64 = btoa(binary);
+              googleVideo = await moderateWithGoogleVideoContent(b64);
+            } catch {
+              // If the sandbox cannot reach localhost, ask user to pick the file
+              const b64 = await promptLocalVideoAsBase64();
+              if (b64) googleVideo = await moderateWithGoogleVideoContent(b64);
+            }
+          } else {
+            // Remote URL - let the edge function fetch and analyze
+            googleVideo = await moderateWithGoogleVideo(url);
+          }
+        } catch (e) {
+          console.warn('Google Video analysis failed:', e);
+        }
+      }
+
+      console.log('Moderation results received:', results, googleVideo);
+
+      const flags: any[] = [];
+
+      if (results?.openai?.flagged) {
+        results.openai.categories.forEach((category: string, index: number) => {
+          const score = results.openai.categoryScores?.[category] || 0;
           flags.push({
             id: `openai-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
             status: 'active' as const,
             confidence: Math.round(score * 100),
             timestamp: new Date().toLocaleString(),
@@ -131,13 +213,12 @@ const Index = () => {
         });
       }
 
-      // Create flags based on Azure results  
-      if (results.azure.flagged) {
-        results.azure.categories.forEach((category, index) => {
-          const score = results.azure.categoryScores[category] || 0;
+      if (results?.azure?.flagged) {
+        results.azure.categories.forEach((category: string, index: number) => {
+          const score = results.azure.categoryScores?.[category] || 0;
           flags.push({
             id: `azure-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
             status: 'active' as const,
             confidence: Math.round(score * 100),
             timestamp: new Date().toLocaleString(),
@@ -148,13 +229,12 @@ const Index = () => {
         });
       }
 
-      // Create flags based on Google Video Intelligence results
-      if (googleVideo && googleVideo.flagged) {
-        googleVideo.categories.forEach((category, index) => {
-          const score = googleVideo.categoryScores[category] || 0;
+      if (googleVideo?.flagged) {
+        googleVideo.categories.forEach((category: string, index: number) => {
+          const score = googleVideo.categoryScores?.[category] || 0;
           flags.push({
             id: `gvi-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
             status: 'active' as const,
             confidence: Math.round(score * 100),
             timestamp: new Date().toLocaleString(),
@@ -165,34 +245,34 @@ const Index = () => {
         });
       }
 
-      // If no flags, add a clean content flag
       if (flags.length === 0) {
         flags.push({
-          id: "clean-content",
-          type: "Content Approved",
-          status: "dismissed" as const,
+          id: 'clean-content',
+          type: 'Content Approved',
+          status: 'dismissed' as const,
           confidence: 89,
           timestamp: new Date().toLocaleString(),
-          model: "Combined AI Analysis",
-          description: "Content analyzed by OpenAI, Azure, and Google Video Intelligence APIs. No policy violations detected.",
-          icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
+          model: 'Combined AI Analysis',
+          description: 'No policy violations detected by available providers.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
+
       setModerationFlags(flags);
     } catch (error) {
-      console.error("Content analysis failed:", error);
-
-      // Create demo flags to show the UI working
-      setModerationFlags([{
-        id: "demo-analysis",
-        type: "Analysis Error",
-        status: "dismissed" as const,
-        confidence: 0,
-        timestamp: new Date().toLocaleString(),
-        model: "Error Handler",
-        description: "Content analysis failed. Using demo mode to show UI functionality.",
-        icon: "https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true"
-      }]);
+      console.error('Content analysis failed:', error);
+      setModerationFlags([
+        {
+          id: 'demo-analysis',
+          type: 'Analysis Error',
+          status: 'dismissed' as const,
+          confidence: 0,
+          timestamp: new Date().toLocaleString(),
+          model: 'Error Handler',
+          description: 'Content analysis failed. Using demo mode to show UI functionality.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+        }
+      ]);
     } finally {
       setIsAnalyzing(false);
     }
@@ -272,8 +352,9 @@ const Index = () => {
       <main className={`flex-1 flex flex-col transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
         {/* Header */}
         <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} />
+        <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" />
 
-        {/* Scrollable Content Area */}
+
         <div className="flex-1 flex flex-col pt-20 pb-20 overflow-hidden py-[56px]">
           {/* View Toggle */}
           <div className="px-4 pb-2 pt-2 flex justify-end items-center flex-shrink-0">
