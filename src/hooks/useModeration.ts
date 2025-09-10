@@ -13,6 +13,7 @@ interface ModerationHook {
   moderateWithOpenAI: (text: string) => Promise<ModerationResult>;
   moderateWithAzure: (text: string) => Promise<ModerationResult>;
   moderateWithGoogleVideo: (uri: string) => Promise<ModerationResult>;
+  moderateWithGoogleVideoContent: (inputContentB64: string) => Promise<ModerationResult>;
   moderateWithBoth: (text: string) => Promise<{
     openai: ModerationResult;
     azure: ModerationResult;
@@ -88,6 +89,24 @@ export const useModeration = (): ModerationHook => {
       setIsLoading(false);
     }
   };
+
+  const moderateWithGoogleVideoContent = async (inputContentB64: string): Promise<ModerationResult> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('moderate-video', {
+        body: { inputContentB64 },
+      });
+      if (error) throw new Error(`Google Video Intelligence failed: ${error.message}`);
+      return data as ModerationResult;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
  
    const moderateWithBoth = async (text: string) => {
     setIsLoading(true);
@@ -140,6 +159,7 @@ export const useModeration = (): ModerationHook => {
     moderateWithOpenAI,
     moderateWithAzure,
     moderateWithGoogleVideo,
+    moderateWithGoogleVideoContent,
     moderateWithBoth,
     isLoading,
     error,

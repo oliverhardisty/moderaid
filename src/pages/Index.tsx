@@ -24,7 +24,8 @@ const Index = () => {
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const {
     moderateWithBoth,
-    moderateWithGoogleVideo
+    moderateWithGoogleVideo,
+    moderateWithGoogleVideoContent
   } = useModeration();
 
   // Content data - fetch from ContentList data structure
@@ -80,7 +81,36 @@ const Index = () => {
     setIsAnalyzing(true);
     try {
       console.log('Calling moderation APIs with content:', videoContent);
-      const [results, googleVideo] = await Promise.all([moderateWithBoth(videoContent), contentData.videoUrl ? moderateWithGoogleVideo(contentData.videoUrl).catch(() => null) : Promise.resolve(null)]);
+      const makeGoogleVideoPromise = async () => {
+        if (!contentData.videoUrl) return null;
+        const url = contentData.videoUrl as string;
+        if (url.startsWith('gs://')) {
+          try { return await moderateWithGoogleVideo(url); } catch { return null; }
+        }
+        if (url.startsWith('http://localhost') || url.startsWith('https://localhost')) {
+          try {
+            const res = await fetch(url);
+            const buf = await res.arrayBuffer();
+            // Convert to base64 in chunks to avoid call stack limits
+            let binary = '';
+            const bytes = new Uint8Array(buf);
+            const chunkSize = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+              const chunk = bytes.subarray(i, i + chunkSize);
+              binary += String.fromCharCode(...chunk);
+            }
+            const b64 = btoa(binary);
+            return await moderateWithGoogleVideoContent(b64);
+          } catch {
+            return null;
+          }
+        }
+        try { return await moderateWithGoogleVideo(url); } catch { return null; }
+      };
+      const [results, googleVideo] = await Promise.all([
+        moderateWithBoth(videoContent),
+        makeGoogleVideoPromise()
+      ]);
       console.log('Moderation results received:', results, googleVideo);
       const flags = [];
 

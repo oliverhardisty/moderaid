@@ -39,36 +39,67 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { gcsUri, videoUrl, features } = body as {
+    const { gcsUri, videoUrl, inputContentB64, features } = body as {
       gcsUri?: string;
       videoUrl?: string;
+      inputContentB64?: string;
       features?: string[];
     };
 
-    log('Request body received', { gcsUri, videoUrl, features });
+    log('Request body received', { gcsUri, videoUrl, hasInputContent: !!inputContentB64, features });
 
-    if (!gcsUri && !videoUrl) {
+    if (!gcsUri && !videoUrl && !inputContentB64) {
       return new Response(
-        JSON.stringify({ error: 'Provide either gcsUri (gs://bucket/object) or videoUrl' }),
+        JSON.stringify({ error: 'Provide either gcsUri (gs://bucket/object), inputContentB64, or videoUrl' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    if (!gcsUri && videoUrl) {
-      // For now we only support GCS URIs reliably for Video Intelligence
-      // Google Drive or other URLs are not supported by the API as inputUri.
+    let effectiveInput: { inputUri?: string; inputContent?: string } = {};
+
+    if (gcsUri) {
+      effectiveInput.inputUri = gcsUri;
+    } else if (inputContentB64) {
+      effectiveInput.inputContent = inputContentB64;
+    } else if (videoUrl) {
+      try {
+        const u = new URL(videoUrl);
+        if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
+          return new Response(
+            JSON.stringify({ error: 'Server cannot access localhost URLs. Upload the video or send inputContentB64 instead.', code: 'LOCALHOST_UNREACHABLE' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        // Fetch remote video and convert to base64
+        const res = await fetch(videoUrl);
+        if (!res.ok) {
+          return new Response(JSON.stringify({ error: 'Failed to fetch video from URL' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        const arrayBuf = await res.arrayBuffer();
+        // Base64 encode
+        // deno-lint-ignore no-explicit-any
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf) as any));
+        effectiveInput.inputContent = base64;
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Invalid or unreachable videoUrl', details: String(e) }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    if (!effectiveInput.inputUri && !effectiveInput.inputContent) {
       return new Response(
-        JSON.stringify({
-          error:
-            'Google Video Intelligence requires a Google Cloud Storage URI. Please provide a gs:// URI to the video.',
-          code: 'UNSUPPORTED_INPUT_URI',
-        }),
+        JSON.stringify({ error: 'No valid input provided for analysis' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const requestBody = {
-      inputUri: gcsUri,
+      ...effectiveInput,
       features:
         features ?? [
           'EXPLICIT_CONTENT_DETECTION',
