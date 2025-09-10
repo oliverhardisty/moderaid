@@ -23,21 +23,129 @@ const likelihoodToScore: Record<string, number> = {
 // Utility: wait ms
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+// Google OAuth2 Service Account helpers
+// Minimal helpers to obtain an access token using a service account (JWT flow)
+type ServiceAccount = { client_email: string; private_key: string; token_uri?: string };
+
+function pemToArrayBuffer(pem: string): ArrayBuffer {
+  const b64 = pem
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s+/g, '');
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function base64UrlFromArrayBuffer(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  const b64 = btoa(binary);
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function importPrivateKey(pem: string): Promise<CryptoKey> {
+  const keyData = pemToArrayBuffer(pem);
+  return await crypto.subtle.importKey(
+    'pkcs8',
+    keyData,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+}
+
+function base64UrlEncodeString(str: string): string {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  return base64UrlFromArrayBuffer(data.buffer);
+}
+
+async function signJwtRS256(
+  header: Record<string, unknown>,
+  payload: Record<string, unknown>,
+  privateKeyPem: string
+): Promise<string> {
+  const headerB64 = base64UrlEncodeString(JSON.stringify(header));
+  const payloadB64 = base64UrlEncodeString(JSON.stringify(payload));
+  const toSign = `${headerB64}.${payloadB64}`;
+  const key = await importPrivateKey(privateKeyPem);
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    new TextEncoder().encode(toSign)
+  );
+  const sigB64 = base64UrlFromArrayBuffer(signature);
+  return `${toSign}.${sigB64}`;
+}
+
+async function getGoogleAccessTokenFromServiceAccount(
+  sa: ServiceAccount,
+  scope: string
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const tokenUri = sa.token_uri || 'https://oauth2.googleapis.com/token';
+  const jwt = await signJwtRS256(
+    { alg: 'RS256', typ: 'JWT' },
+    {
+      iss: sa.client_email,
+      scope,
+      aud: tokenUri,
+      iat: now,
+      exp: now + 3600,
+    },
+    sa.private_key
+  );
+
+  const form = new URLSearchParams({
+    grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+    assertion: jwt,
+  });
+
+  const res = await fetch(tokenUri, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(`Failed to obtain Google access token: ${json.error || res.statusText}`);
+  }
+  return json.access_token as string;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const apiKey = Deno.env.get('GOOGLE_CLOUD_API_KEY');
-    if (!apiKey) {
-      log('Missing GOOGLE_CLOUD_API_KEY');
-      return new Response(JSON.stringify({ error: 'Server misconfiguration: GOOGLE_CLOUD_API_KEY not set' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    const saRaw = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
+    if (!saRaw) {
+      log('Missing GOOGLE_SERVICE_ACCOUNT_JSON');
+      return new Response(
+        JSON.stringify({ error: 'Server misconfiguration: GOOGLE_SERVICE_ACCOUNT_JSON not set' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
+    let serviceAccount: ServiceAccount;
+    try {
+      serviceAccount = JSON.parse(saRaw);
+    } catch (e) {
+      log('Invalid GOOGLE_SERVICE_ACCOUNT_JSON', String(e));
+      return new Response(
+        JSON.stringify({ error: 'Invalid GOOGLE_SERVICE_ACCOUNT_JSON', details: String(e) }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const accessToken = await getGoogleAccessTokenFromServiceAccount(
+      serviceAccount,
+      'https://www.googleapis.com/auth/cloud-platform'
+    );
     const body = await req.json().catch(() => ({}));
     const { gcsUri, videoUrl, inputContentB64, features } = body as {
       gcsUri?: string;
@@ -67,6 +175,15 @@ Deno.serve(async (req) => {
         if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
           return new Response(
             JSON.stringify({ error: 'Server cannot access localhost URLs. Upload the video or send inputContentB64 instead.', code: 'LOCALHOST_UNREACHABLE' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (u.hostname.includes('youtube.com') || u.hostname === 'youtu.be') {
+          return new Response(
+            JSON.stringify({
+              error: 'YouTube URLs are not supported directly. Provide a GCS URI (gs://) or upload a direct video file so we can analyze bytes.',
+              code: 'YOUTUBE_URL_NOT_SUPPORTED'
+            }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
@@ -132,10 +249,13 @@ Deno.serve(async (req) => {
     log('Submitting annotate request to Google Video Intelligence');
 
     const annotateRes = await fetch(
-      `https://videointelligence.googleapis.com/v1/videos:annotate?key=${encodeURIComponent(apiKey)}`,
+      `https://videointelligence.googleapis.com/v1/videos:annotate`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(requestBody),
       }
     );
@@ -157,9 +277,8 @@ Deno.serve(async (req) => {
     const maxAttempts = 40; // ~2 minutes max if 3s interval
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const opRes = await fetch(
-        `https://videointelligence.googleapis.com/v1/${encodeURIComponent(
-          operationName
-        )}?key=${encodeURIComponent(apiKey)}`
+        `https://videointelligence.googleapis.com/v1/${encodeURIComponent(operationName)}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       const opJson = await opRes.json();
 
