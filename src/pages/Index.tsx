@@ -19,47 +19,49 @@ const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [moderationFlags, setModerationFlags] = useState<any[]>([
-    {
-      id: 'violence-detected',
-      type: 'Violence Detection',
-      status: 'active' as const,
-      confidence: 87,
-      timestamp: new Date().toLocaleString(),
-      model: 'Initial Analysis',
-      description: 'Hockey fight content detected - requires manual review',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-    },
-    {
-      id: 'sports-violence',
-      type: 'Sports Violence',
-      status: 'active' as const,
-      confidence: 92,
-      timestamp: new Date().toLocaleString(),
-      model: 'Content Classifier',
-      description: 'Physical altercation in sports context detected',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-    },
-    {
-      id: 'aggressive-behavior',
-      type: 'Aggressive Behavior',
-      status: 'active' as const,
-      confidence: 79,
-      timestamp: new Date().toLocaleString(),
-      model: 'Behavioral Analysis',
-      description: 'Multiple instances of aggressive physical contact',
-      icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-    }
-  ]);
+  const [moderationFlags, setModerationFlags] = useState<any[]>([{
+    id: 'violence-detected',
+    type: 'Violence Detection',
+    status: 'active' as const,
+    confidence: 87,
+    timestamp: new Date().toLocaleString(),
+    model: 'Initial Analysis',
+    description: 'Hockey fight content detected - requires manual review',
+    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+  }, {
+    id: 'sports-violence',
+    type: 'Sports Violence',
+    status: 'active' as const,
+    confidence: 92,
+    timestamp: new Date().toLocaleString(),
+    model: 'Content Classifier',
+    description: 'Physical altercation in sports context detected',
+    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+  }, {
+    id: 'aggressive-behavior',
+    type: 'Aggressive Behavior',
+    status: 'active' as const,
+    confidence: 79,
+    timestamp: new Date().toLocaleString(),
+    model: 'Behavioral Analysis',
+    description: 'Multiple instances of aggressive physical contact',
+    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+  }]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  const { moderateWithGoogleVideo } = useModeration();
-  
-  const { contentItems, loading: itemsLoading } = useContentItems();
+  const {
+    toast
+  } = useToast();
+  const {
+    moderateWithGoogleVideo
+  } = useModeration();
+  const {
+    contentItems,
+    loading: itemsLoading
+  } = useContentItems();
 
   // Content data - use the same data as ContentList
   const currentContent = contentItems.find(item => item.id === `#${contentId}`) || contentItems[0];
@@ -74,7 +76,7 @@ const Index = () => {
   } : {
     id: '#67890',
     priority: 'high' as const,
-    title: 'NHL Greatest Fights Of All Time', 
+    title: 'NHL Greatest Fights Of All Time',
     uploadDate: 'Mar 12, 2024',
     views: 15781,
     viewerReports: 12,
@@ -96,7 +98,6 @@ const Index = () => {
   const analyzeContent = async () => {
     console.log('Starting content analysis (Google)...');
     setIsAnalyzing(true);
-
     try {
       const flags: any[] = [];
 
@@ -118,7 +119,6 @@ const Index = () => {
         } else {
           try {
             const googleResult = await moderateWithGoogleVideo(contentData.videoUrl);
-
             if (googleResult?.flagged) {
               googleResult.categories.forEach((category: string, index: number) => {
                 const score = googleResult.categoryScores?.[category] ?? 0;
@@ -165,7 +165,6 @@ const Index = () => {
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
-
       setModerationFlags(flags);
       const activeFlags = flags.filter(f => f.status === 'active').length;
       toast({
@@ -174,9 +173,8 @@ const Index = () => {
       });
     } catch (error: any) {
       console.error('Content analysis failed:', error);
-      
       let errorDescription = 'Unable to analyze content. Google API failed.';
-      
+
       // Handle specific error cases
       if (error?.message?.includes('LOCALHOST_UNREACHABLE')) {
         errorDescription = 'Cannot access localhost video URLs from server. Please upload video to public storage or use a publicly accessible URL.';
@@ -185,19 +183,16 @@ const Index = () => {
       } else if (error?.message?.includes('403') || error?.message?.includes('unauthorized')) {
         errorDescription = 'API keys invalid or services not enabled. Check your Google Cloud configuration.';
       }
-      
-      setModerationFlags([
-        {
-          id: 'analysis-failed',
-          type: 'Analysis Failed',
-          status: 'active' as const,
-          confidence: 0,
-          timestamp: new Date().toLocaleString(),
-          model: 'Multi-Provider Analysis',
-          description: errorDescription,
-          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-        }
-      ]);
+      setModerationFlags([{
+        id: 'analysis-failed',
+        type: 'Analysis Failed',
+        status: 'active' as const,
+        confidence: 0,
+        timestamp: new Date().toLocaleString(),
+        model: 'Multi-Provider Analysis',
+        description: errorDescription,
+        icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+      }]);
       toast({
         title: "Analysis Failed",
         description: errorDescription,
@@ -214,7 +209,7 @@ const Index = () => {
     setModerationFlags([]);
     toast({
       title: "Flags Reset",
-      description: "All automated flags have been cleared for this content.",
+      description: "All automated flags have been cleared for this content."
     });
   };
 
@@ -322,15 +317,7 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel 
-                  flags={moderationFlags} 
-                  userReports={3} 
-                  uploaderStatus="good" 
-                  moderationHistory={3} 
-                  isAnalyzing={isAnalyzing} 
-                  onRunAnalysis={analyzeContent}
-                  onResetFlags={resetFlags}
-                />
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} />
               </div>
             </Panel>
             
