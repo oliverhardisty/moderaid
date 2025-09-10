@@ -34,7 +34,8 @@ const Index = () => {
     uploadDate: 'Mar 12, 2024',
     views: 15781,
     userReports: 12,
-    priority: 'high' as const
+    priority: 'high' as const,
+    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Yoti/Content%20moderation/Moderaid/Content/clips/0539c3dc73b0/0539c3dc73b0.mp4'
   }, {
     id: '#77889',
     title: 'Cooking Tutorial - Italian Pasta',
