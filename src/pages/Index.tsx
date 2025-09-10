@@ -299,15 +299,27 @@ const Index = () => {
       // Run Google analysis on uploaded URL
       const googleResult = await moderateWithGoogleVideo(publicUrl);
       const flags: any[] = [];
-      if (googleResult?.flagged) {
-        googleResult.categories.forEach((category: string, index: number) => {
-          const score = googleResult.categoryScores?.[category] ?? 0;
-          
-          // Get timestamps for this specific category
-          const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => 
-            ts.categories.includes(category)
-          ) || [];
-          
+        if (googleResult?.flagged) {
+          googleResult.categories.forEach((category: string, index: number) => {
+            const score = googleResult.categoryScores?.[category] ?? 0;
+            
+            // Get timestamps for this specific category - improve matching logic
+            const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => {
+              // Check if any of the timestamp categories match the current category
+              return ts.categories.some((tsCategory: string) => 
+                tsCategory === category || 
+                tsCategory.toLowerCase() === category.toLowerCase() ||
+                tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
+              );
+            }) || [];
+            
+            console.log(`Processing Google category "${category}":`, {
+              totalTimestamps: googleResult.timestamps?.length || 0,
+              matchingTimestamps: categoryTimestamps.length,
+              timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
+              categoryTimestamps
+            });
+            
             flags.push({
               id: `google-${category}-${index}`,
               type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -326,8 +338,8 @@ const Index = () => {
               timestampsCount: categoryTimestamps.length,
               timestamps: categoryTimestamps
             });
-        });
-      }
+          });
+        }
       if (flags.length === 0) {
         flags.push({
           id: 'content-approved',
@@ -377,10 +389,20 @@ const Index = () => {
           result.categories.forEach((category: string, index: number) => {
             const score = result.categoryScores?.[category] ?? 0;
             
-            // Get timestamps for this specific category from the stored result
-            const categoryTimestamps = (result as any).timestamps?.filter((ts: any) => 
-              ts.categories.includes(category)
-            ) || [];
+            // Get timestamps for this specific category from the stored result - improve matching
+            const categoryTimestamps = (result as any).timestamps?.filter((ts: any) => {
+              return ts.categories.some((tsCategory: string) => 
+                tsCategory === category || 
+                tsCategory.toLowerCase() === category.toLowerCase() ||
+                tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
+              );
+            }) || [];
+            
+            console.log(`Processing stored category "${category}":`, {
+              totalTimestamps: (result as any).timestamps?.length || 0,
+              matchingTimestamps: categoryTimestamps.length,
+              timestampCategories: (result as any).timestamps?.map((ts: any) => ts.categories) || []
+            });
             
             flags.push({
               id: `google-${category}-${index}`,
