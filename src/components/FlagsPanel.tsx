@@ -32,6 +32,12 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   onRunAnalysis,
   onResetFlags
 }) => {
+  console.log('FlagsPanel received flags:', flags.map(f => ({
+    type: f.type,
+    hasTimestamps: !!f.timestamps,
+    timestampsLength: f.timestamps?.length || 0
+  })));
+  
   const [expandedSections, setExpandedSections] = useState({
     flags: true,
     reports: false,
@@ -124,7 +130,16 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 <p className="text-xs text-gray-400 mt-1">Content passed all AI moderation checks</p>
               </div>
             ) : (
-              flags.map((flag, index) => (
+              flags.map((flag, index) => {
+                console.log('Rendering flag:', {
+                  id: flag.id,
+                  type: flag.type,
+                  hasTimestamps: !!flag.timestamps,
+                  timestampsLength: flag.timestamps?.length || 0,
+                  timestamps: flag.timestamps
+                });
+                
+                return (
                 <div 
                   key={flag.id}
                   className={`${index < flags.length - 1 ? 'pb-3 border-b border-gray-100' : ''}`}
@@ -154,6 +169,13 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     </div>
                     <div className="bg-gray-50 p-2 rounded text-gray-700 mt-2">
                       {flag.description}
+                      {/* Debug indicator */}
+                      <div className="text-xs text-blue-600 mt-1 font-mono">
+                        DEBUG: Timestamps: {flag.timestamps ? `${flag.timestamps.length} found` : 'none'}
+                        {flag.timestamps && flag.timestamps.length > 0 && (
+                          <span className="ml-2 text-green-600">✓ Should show timestamps below</span>
+                        )}
+                      </div>
                     </div>
                     
                     {/* Show timestamps if available */}
@@ -203,7 +225,8 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     )}
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
             
             {/* Action Buttons */}
