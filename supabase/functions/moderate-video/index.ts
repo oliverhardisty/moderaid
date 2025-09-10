@@ -79,9 +79,15 @@ Deno.serve(async (req) => {
           });
         }
         const arrayBuf = await res.arrayBuffer();
-        // Base64 encode
-        // deno-lint-ignore no-explicit-any
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf) as any));
+        // Base64 encode using chunked approach to avoid stack overflow
+        const uint8Array = new Uint8Array(arrayBuf);
+        let binary = '';
+        const chunkSize = 0x8000; // 32KB chunks
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          const chunk = uint8Array.subarray(i, i + chunkSize);
+          binary += String.fromCharCode(...chunk);
+        }
+        const base64 = btoa(binary);
         effectiveInput.inputContent = base64;
       } catch (e) {
         return new Response(JSON.stringify({ error: 'Invalid or unreachable videoUrl', details: String(e) }), {
