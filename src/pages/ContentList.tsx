@@ -89,6 +89,16 @@ const ContentList = () => {
     }
   }, [loading, contentItems, moderateWithGoogleVideo, updateModerationResult]);
 
+  // Helper function to get automated flag count
+  const getAutomatedFlagCount = (item: any) => {
+    if (!item.moderation_result || !item.moderation_result.flagged) {
+      return 0;
+    }
+    
+    // Count categories that were flagged
+    return item.moderation_result.categories ? item.moderation_result.categories.length : 0;
+  };
+
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -229,6 +239,7 @@ const ContentList = () => {
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Upload Date</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Views</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">User reports</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Automated flags</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Priority</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
                     </tr>
@@ -266,6 +277,30 @@ const ContentList = () => {
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
+                        </td>
+                        <td className="py-4 px-4">
+                          {(() => {
+                            const flagCount = getAutomatedFlagCount(item);
+                            if (flagCount > 0) {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                  <span className="text-red-600 font-medium">{flagCount}</span>
+                                </div>
+                              );
+                            } else if (item.moderation_status === 'completed') {
+                              return <span className="text-green-600 text-sm">✓ Clean</span>;
+                            } else if (item.moderation_status === 'analyzing') {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                  <span className="text-xs text-blue-600">Analyzing</span>
+                                </div>
+                              );
+                            } else {
+                              return <span className="text-gray-400">-</span>;
+                            }
+                          })()}
                         </td>
                         <td className="py-4 px-4">
                           {getPriorityBadge(item.priority)}

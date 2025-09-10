@@ -20,6 +20,8 @@ export type Database = {
           duration: number | null
           file_size: number | null
           id: string
+          moderation_result: Json | null
+          moderation_status: string | null
           priority: string | null
           status: string | null
           storage_path: string | null
@@ -36,6 +38,8 @@ export type Database = {
           duration?: number | null
           file_size?: number | null
           id?: string
+          moderation_result?: Json | null
+          moderation_status?: string | null
           priority?: string | null
           status?: string | null
           storage_path?: string | null
@@ -52,6 +56,8 @@ export type Database = {
           duration?: number | null
           file_size?: number | null
           id?: string
+          moderation_result?: Json | null
+          moderation_status?: string | null
           priority?: string | null
           status?: string | null
           storage_path?: string | null
