@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { VideoUploadDialog } from '@/components/VideoUploadDialog';
-import { ModerateByUrlDialog } from '@/components/ModerateByUrlDialog';
 import { 
   Select,
   SelectContent,
@@ -13,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Flag, Loader2, Globe } from 'lucide-react';
+import { Search, Plus, Flag, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContentItems } from '@/hooks/useContentItems';
 import { useModeration } from '@/hooks/useModeration';
@@ -39,9 +38,6 @@ const ContentList = () => {
   const [uploadDateFilter, setUploadDateFilter] = useState('all');
   const [viewsFilter, setViewsFilter] = useState('all');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [urlDialogOpen, setUrlDialogOpen] = useState(false);
-  const [initialUrl, setInitialUrl] = useState<string | undefined>();
-  const [initialTitle, setInitialTitle] = useState<string | undefined>();
   
   const { contentItems, loading, refetch } = useContentItems();
   const { moderateWithGoogleVideo } = useModeration();
@@ -58,17 +54,6 @@ const ContentList = () => {
     }
   }, [loading, contentItems, moderateWithGoogleVideo]);
 
-  // Auto-open URL moderation via query param
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mUrl = params.get('moderateUrl');
-    if (mUrl) {
-      setInitialUrl(mUrl);
-      const t = params.get('title') || undefined;
-      if (t) setInitialTitle(t);
-      setUrlDialogOpen(true);
-    }
-  }, []);
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -182,13 +167,6 @@ const ContentList = () => {
                 <Plus className="w-4 h-4 mr-2" />
                 Add content
               </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setUrlDialogOpen(true)}
-              >
-                <Globe className="w-4 h-4 mr-2" />
-                Moderate by URL
-              </Button>
             </div>
           </div>
 
@@ -289,16 +267,6 @@ const ContentList = () => {
           open={uploadDialogOpen}
           onOpenChange={setUploadDialogOpen}
           onUploadComplete={handleUploadComplete}
-        />
-
-        {/* Moderate by URL Dialog */}
-        <ModerateByUrlDialog
-          open={urlDialogOpen}
-          onOpenChange={setUrlDialogOpen}
-          onComplete={handleUploadComplete}
-          initialUrl={initialUrl}
-          initialTitle={initialTitle}
-          autoStart={Boolean(initialUrl)}
         />
       </main>
     </div>
