@@ -12,6 +12,7 @@ import { Layout } from 'lucide-react';
 import { useModeration } from '@/hooks/useModeration';
 import { useToast } from '@/hooks/use-toast';
 import { useContentItems } from '@/hooks/useContentItems';
+import { supabase } from '@/integrations/supabase/client';
 const Index = () => {
   const {
     contentId
@@ -104,6 +105,18 @@ const Index = () => {
       // Try Google Video Intelligence first (skip if YouTube URL)
       if (contentData.videoUrl) {
         const urlLower = contentData.videoUrl.toLowerCase();
+
+        // If local file URL, prompt for upload and analyze the uploaded copy
+        if (urlLower.includes('localhost') || urlLower.includes('127.0.0.1')) {
+          toast({
+            title: "Local video detected",
+            description: "Select the local file to upload temporarily for analysis."
+          });
+          setIsAnalyzing(false);
+          fileInputRef.current?.click();
+          return;
+        }
+
         const isYouTube = urlLower.includes('youtube.com') || urlLower.includes('youtu.be');
         if (isYouTube) {
           flags.push({
@@ -213,6 +226,79 @@ const Index = () => {
     });
   };
 
+  // Handle local file selection -> upload to Supabase then analyze
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadAndAnalyzeLocalFile(file);
+    // clear input
+    e.target.value = '';
+  };
+
+  const uploadAndAnalyzeLocalFile = async (file: File) => {
+    try {
+      setIsAnalyzing(true);
+      toast({ title: "Uploading video", description: "Preparing a copy for analysis..." });
+      const ext = file.name.split('.').pop() || 'mp4';
+      const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('videos').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || 'video/mp4'
+      });
+      if (uploadError) {
+        console.error('Upload failed:', uploadError);
+        toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+        setIsAnalyzing(false);
+        return;
+      }
+      const { data: pub } = supabase.storage.from('videos').getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+      // Run Google analysis on uploaded URL
+      const googleResult = await moderateWithGoogleVideo(publicUrl);
+      const flags: any[] = [];
+      if (googleResult?.flagged) {
+        googleResult.categories.forEach((category: string, index: number) => {
+          const score = googleResult.categoryScores?.[category] ?? 0;
+          flags.push({
+            id: `google-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date().toLocaleString(),
+            model: 'Google Video Intelligence',
+            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+          });
+        });
+      }
+      if (flags.length === 0) {
+        flags.push({
+          id: 'content-approved',
+          type: 'Content Approved',
+          status: 'dismissed' as const,
+          confidence: 95,
+          timestamp: new Date().toLocaleString(),
+          model: 'Google Video Intelligence',
+          description: 'No policy violations detected.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+        });
+      }
+      setModerationFlags(flags);
+      const activeFlags = flags.filter(f => f.status === 'active').length;
+      toast({ title: "Analysis Complete", description: `Found ${activeFlags} flags for "${contentData.title}"` });
+    } catch (err: any) {
+      console.error('Local upload analyze failed:', err);
+      toast({
+        title: "Analysis Failed",
+        description: err?.message || 'Unable to analyze uploaded copy.',
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   // Auto-analyze when content is loaded and URL available
   useEffect(() => {
     if (!itemsLoading && contentData.videoUrl) {
@@ -289,7 +375,7 @@ const Index = () => {
       <main className={`flex-1 flex flex-col transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
         {/* Header */}
         <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} />
-        <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" />
+        <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={(e) => handleFileChange(e)} />
 
 
         <div className="flex-1 flex flex-col pt-20 pb-20 overflow-hidden py-[56px]">
