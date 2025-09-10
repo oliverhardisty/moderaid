@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Layout } from 'lucide-react';
 import { useModeration } from '@/hooks/useModeration';
 import { useToast } from '@/hooks/use-toast';
+import { useContentItems } from '@/hooks/useContentItems';
 const Index = () => {
   const {
     contentId
@@ -60,42 +61,27 @@ const Index = () => {
     moderateWithGoogleVideo,
     moderateWithAzure,
   } = useModeration();
+  
+  const { contentItems } = useContentItems();
 
-  // Content data - fetch from ContentList data structure
-  const allContentItems = [{
-    id: '#67890',
-    title: 'NHL Greatest Fights Of All Time',
-    uploadDate: 'Mar 12, 2024',
-    views: 15781,
-    userReports: 12,
-    priority: 'high' as const,
-    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
-  }, {
-    id: '#77889',
-    title: 'Cooking Tutorial - Italian Pasta',
-    uploadDate: 'Jan 11, 2024',
-    views: 1685,
-    userReports: 0,
-    priority: 'medium' as const,
-    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
-  }, {
-    id: '#99001',
-    title: 'DIY Home Improvement Tips',
-    uploadDate: 'Jan 10, 2024',
-    views: 562,
-    userReports: 1,
-    priority: 'low' as const,
-    videoUrl: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/violence.mp4'
-  }];
-  const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
-  const contentData = {
+  // Content data - use the same data as ContentList
+  const currentContent = contentItems.find(item => item.id === `#${contentId}`) || contentItems[0];
+  const contentData = currentContent ? {
     id: currentContent.id,
     priority: currentContent.priority,
     title: currentContent.title,
-    uploadDate: currentContent.uploadDate.replace(/(\w+)\s(\d+),\s(\d+)/, '$2/$1/$3'),
+    uploadDate: currentContent.upload_date,
     views: currentContent.views,
-    viewerReports: currentContent.userReports,
-    videoUrl: (currentContent as any).videoUrl
+    viewerReports: currentContent.user_reports,
+    videoUrl: currentContent.video_url
+  } : {
+    id: '#67890',
+    priority: 'high' as const,
+    title: 'NHL Greatest Fights Of All Time', 
+    uploadDate: 'Mar 12, 2024',
+    views: 15781,
+    viewerReports: 12,
+    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
   };
 
   // Video content for moderation analysis
