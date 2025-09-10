@@ -43,14 +43,17 @@ const ContentList = () => {
   const { moderateWithGoogleVideo } = useModeration();
   const prefetchStartedRef = useRef(false);
 
-  // Prefetch moderation for the first available item (starts before viewing)
+  // Start automated moderation checks for all content items when page loads
   useEffect(() => {
     if (!loading && !prefetchStartedRef.current && contentItems.length > 0) {
-      const firstWithUrl = contentItems.find((i) => i.video_url);
-      if (firstWithUrl?.video_url) {
-        prefetchStartedRef.current = true;
-        void moderateWithGoogleVideo(firstWithUrl.video_url);
-      }
+      prefetchStartedRef.current = true;
+      
+      // Start moderation for all items with video URLs
+      contentItems.forEach((item) => {
+        if (item.video_url) {
+          void moderateWithGoogleVideo(item.video_url);
+        }
+      });
     }
   }, [loading, contentItems, moderateWithGoogleVideo]);
 
