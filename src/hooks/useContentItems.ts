@@ -29,13 +29,13 @@ export const useContentItems = () => {
   const mockContentItems: ContentItem[] = [
     {
       id: '#67890',
-      title: 'NHL Greatest Fights Of All Time',
+      title: 'Sexual Content Test Video',
       upload_date: 'Mar 12, 2024',
       views: 15781,
       user_reports: 12,
       priority: 'high',
       status: 'approved',
-      video_url: 'https://www.youtube.com/watch?v=YXHPQqmvJkI',
+      video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
       created_at: '2024-03-12T00:00:00Z',
       updated_at: '2024-03-12T00:00:00Z'
     },
@@ -53,13 +53,12 @@ export const useContentItems = () => {
     },
     {
       id: '#99001',
-      title: 'Sexual Content Test Video',
+      title: 'DIY Home Improvement Tips',
       upload_date: 'Jan 10, 2024',
       views: 562,
       user_reports: 1,
-      priority: 'high',
+      priority: 'low',
       status: 'pending',
-      video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
       created_at: '2024-01-10T00:00:00Z',
       updated_at: '2024-01-10T00:00:00Z'
     },
