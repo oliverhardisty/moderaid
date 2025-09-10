@@ -111,7 +111,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
                   <p className="text-sm text-gray-600">Running AI content analysis...</p>
-                  <p className="text-xs text-gray-400 mt-1">Checking with OpenAI and Azure APIs</p>
+                  <p className="text-xs text-gray-400 mt-1">Checking with Google Video Intelligence</p>
                 </div>
               </div>
             ) : flags.length === 0 ? (

@@ -26,9 +26,7 @@ const Index = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const {
-    moderateWithBoth,
     moderateWithGoogleVideo,
-    moderateWithGoogleVideoContent
   } = useModeration();
 
   // Content data - fetch from ContentList data structure
@@ -80,89 +78,50 @@ const Index = () => {
 
   // Function to analyze video content with moderation APIs
   const analyzeContent = async () => {
-    console.log('Starting content analysis...');
+    console.log('Starting content analysis (Google only)...');
     setIsAnalyzing(true);
 
     try {
-      console.log('Checking moderation API status for content:', contentData.title);
-
-      // Create flags based on API availability and results
       const flags: any[] = [];
-      let hasValidApis = false;
 
-      // Test text-based moderation APIs
-      try {
-        const results = await moderateWithBoth(videoContent);
-        hasValidApis = true;
-        
-        if (results?.openai?.flagged) {
-          results.openai.categories.forEach((category: string, index: number) => {
-            const score = results.openai.categoryScores?.[category] || 0;
-            flags.push({
-              id: `openai-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'OpenAI Moderation API',
-              description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
-            });
-          });
-        }
-
-        if (results?.azure?.flagged) {
-          results.azure.categories.forEach((category: string, index: number) => {
-            const score = results.azure.categoryScores?.[category] || 0;
-            flags.push({
-              id: `azure-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'Azure Content Safety',
-              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-            });
-          });
-        }
-      } catch (e) {
-        console.warn('Text moderation APIs failed:', e);
-        // Show API configuration error
-        flags.push({
-          id: 'api-config-error',
-          type: 'API Configuration Error',
-          status: 'active' as const,
-          confidence: 100,
-          timestamp: new Date().toLocaleString(),
-          model: 'System Check',
-          description: 'Moderation APIs not properly configured. Please check your OpenAI and Azure API credentials in Supabase secrets.',
-          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-        });
+      if (!contentData.videoUrl) {
+        throw new Error('Missing video URL for analysis');
       }
 
-      // If APIs worked and no violations found, show success message
-      if (hasValidApis && flags.length === 0) {
+      const result = await moderateWithGoogleVideo(contentData.videoUrl);
+
+      if (result?.flagged) {
+        result.categories.forEach((category: string, index: number) => {
+          const score = result.categoryScores?.[category] ?? 0;
+          flags.push({
+            id: `google-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date().toLocaleString(),
+            model: 'Google Video Intelligence',
+            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+          });
+        });
+      } else {
         flags.push({
           id: 'content-approved',
           type: 'Content Approved',
           status: 'dismissed' as const,
           confidence: 95,
           timestamp: new Date().toLocaleString(),
-          model: 'AI Content Analysis',
-          description: 'No policy violations detected. Content passed all moderation checks.',
+          model: 'Google Video Intelligence',
+          description: 'No policy violations detected. Content passed Google moderation checks.',
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
 
       setModerationFlags(flags);
       toast({
-        title: hasValidApis ? "Analysis Complete" : "API Configuration Required",
-        description: hasValidApis 
-          ? `Found ${flags.filter(f => f.status === 'active').length} flags for "${contentData.title}"`
-          : "Please configure your moderation API credentials in Supabase settings"
+        title: "Analysis Complete",
+        description: `Found ${flags.filter(f => f.status === 'active').length} flags for "${contentData.title}"`
       });
-      
     } catch (error) {
       console.error('Content analysis failed:', error);
       setModerationFlags([
@@ -172,8 +131,8 @@ const Index = () => {
           status: 'active' as const,
           confidence: 0,
           timestamp: new Date().toLocaleString(),
-          model: 'Error Handler',
-          description: 'Unable to analyze content. Please check your internet connection and API configuration.',
+          model: 'Google Video Intelligence',
+          description: 'Unable to analyze content. Please confirm your Google Cloud API key and Video Intelligence API access.',
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         }
       ]);
