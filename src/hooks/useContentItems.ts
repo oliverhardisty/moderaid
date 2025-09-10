@@ -53,12 +53,13 @@ export const useContentItems = () => {
     },
     {
       id: '#99001',
-      title: 'DIY Home Improvement Tips',
+      title: 'Sexual Content Test Video',
       upload_date: 'Jan 10, 2024',
       views: 562,
       user_reports: 1,
-      priority: 'low',
+      priority: 'high',
       status: 'pending',
+      video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
       created_at: '2024-01-10T00:00:00Z',
       updated_at: '2024-01-10T00:00:00Z'
     },
