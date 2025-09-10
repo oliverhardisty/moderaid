@@ -294,6 +294,12 @@ const Index = () => {
       if (googleResult?.flagged) {
         googleResult.categories.forEach((category: string, index: number) => {
           const score = googleResult.categoryScores?.[category] ?? 0;
+          
+          // Get timestamps for this specific category
+          const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => 
+            ts.categories.includes(category)
+          ) || [];
+          
           flags.push({
             id: `google-${category}-${index}`,
             type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -301,8 +307,9 @@ const Index = () => {
             confidence: Math.round(score * 100),
             timestamp: new Date().toLocaleString(),
             model: 'Google Video Intelligence',
-            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
+            timestamps: categoryTimestamps
           });
         });
       }
@@ -354,6 +361,12 @@ const Index = () => {
         if (result.flagged) {
           result.categories.forEach((category: string, index: number) => {
             const score = result.categoryScores?.[category] ?? 0;
+            
+            // Get timestamps for this specific category from the stored result
+            const categoryTimestamps = (result as any).timestamps?.filter((ts: any) => 
+              ts.categories.includes(category)
+            ) || [];
+            
             flags.push({
               id: `google-${category}-${index}`,
               type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -361,8 +374,9 @@ const Index = () => {
               confidence: Math.round(score * 100),
               timestamp: new Date(result.timestamp).toLocaleString(),
               model: 'Google Video Intelligence',
-              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
+              timestamps: categoryTimestamps
             });
           });
         }

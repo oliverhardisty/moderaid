@@ -10,6 +10,7 @@ interface Flag {
   model: string;
   description: string;
   icon: string;
+  timestamps?: Array<{ timeOffset: number; categories: string[]; confidence: number }>;
 }
 
 interface FlagsPanelProps {
@@ -154,6 +155,42 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     <div className="bg-gray-50 p-2 rounded text-gray-700 mt-2">
                       {flag.description}
                     </div>
+                    
+                    {/* Show timestamps if available */}
+                    {flag.timestamps && flag.timestamps.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-xs font-medium text-gray-600 mb-2">
+                          Violation timestamps ({flag.timestamps.length}):
+                        </div>
+                        <div className="space-y-1">
+                          {flag.timestamps.map((timestamp: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between text-xs bg-red-50 p-2 rounded border border-red-100">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="font-mono">
+                                  {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
+                                </span>
+                                <span className="text-red-600 font-medium">
+                                  {Math.round(timestamp.confidence * 100)}%
+                                </span>
+                              </div>
+                              <button 
+                                className="text-blue-600 hover:text-blue-800 font-medium"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // This would trigger video seeking - implement based on your video player setup
+                                  console.log('Seek to:', timestamp.timeOffset);
+                                }}
+                              >
+                                Jump to
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
