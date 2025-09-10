@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, 
 
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-bold text-gray-900">
-          {showBackButton ? contentId : 'Your Content'}
+          {showBackButton ? contentId : 'Your Moderations'}
         </h1>
         {showBackButton ? (
           <Badge 
