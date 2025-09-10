@@ -12,6 +12,7 @@ import { Layout } from 'lucide-react';
 import { useModeration } from '@/hooks/useModeration';
 import { useToast } from '@/hooks/use-toast';
 import { useContentItems } from '@/hooks/useContentItems';
+import { TimestampMarkers } from '@/components/TimestampMarkers';
 import { supabase } from '@/integrations/supabase/client';
 const Index = () => {
   const {
@@ -50,6 +51,7 @@ const Index = () => {
   }]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
+  const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +59,8 @@ const Index = () => {
     toast
   } = useToast();
   const {
-    moderateWithGoogleVideo
+    moderateWithGoogleVideo,
+    moderateWithAzure
   } = useModeration();
   const {
     contentItems,
@@ -216,7 +219,6 @@ const Index = () => {
     }
   };
 
-  // Function to reset automated flags
   const resetFlags = () => {
     console.log('Resetting automated flags for content:', contentData.id);
     setModerationFlags([]);
@@ -224,6 +226,27 @@ const Index = () => {
       title: "Flags Reset",
       description: "All automated flags have been cleared for this content."
     });
+  };
+
+  // Test Azure API
+  const testAzureAPI = async () => {
+    try {
+      console.log('Testing Azure API...');
+      toast({ title: "Testing Azure API", description: "Checking Azure Content Safety configuration..." });
+      const result = await moderateWithAzure("This is a test message for Azure moderation.");
+      console.log('Azure test result:', result);
+      toast({
+        title: "Azure API Test Successful", 
+        description: `Provider: ${result.provider}, Flagged: ${result.flagged}`
+      });
+    } catch (error) {
+      console.error('Azure test failed:', error);
+      toast({
+        title: "Azure API Test Failed",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive"
+      });
+    }
   };
 
   // Handle local file selection -> upload to Supabase then analyze
@@ -310,10 +333,11 @@ const Index = () => {
     });
 
     if (!itemsLoading && currentContent) {
-      // Check if we have stored results for this content
-      if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
-        console.log('Using stored moderation results for:', currentContent.id);
-        const result = currentContent.moderation_result;
+        // Check if we have stored results for this content
+        if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
+          console.log('Using stored moderation results for:', currentContent.id);
+          const result = currentContent.moderation_result;
+          setCurrentModerationResult(result);
         const flags: any[] = [];
         
         if (result.flagged) {
@@ -346,6 +370,7 @@ const Index = () => {
         }
         
         setModerationFlags(flags);
+        setCurrentModerationResult(result);
         setIsAnalyzing(false);
       } else if (contentData.videoUrl && (!currentContent.moderation_result || currentContent.moderation_status !== 'completed')) {
         // Only analyze if no stored results or analysis not complete
@@ -452,7 +477,7 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} />
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} onTestAzure={testAzureAPI} />
               </div>
             </Panel>
             
@@ -464,6 +489,18 @@ const Index = () => {
             <Panel ref={rightPanelRef} defaultSize={70} minSize={40}>
               <div className="flex flex-col gap-4 h-full pl-4">
                 <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} />
+                
+                {/* Timestamp Markers */}
+                {currentModerationResult?.timestamps && (
+                  <TimestampMarkers 
+                    timestamps={currentModerationResult.timestamps}
+                    onSeekTo={(time) => {
+                      // This would seek the video to the timestamp
+                      console.log('Seeking to:', time);
+                    }}
+                    videoDuration={60} // Would need to get actual duration from video player
+                  />
+                )}
                 
                 <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
               </div>

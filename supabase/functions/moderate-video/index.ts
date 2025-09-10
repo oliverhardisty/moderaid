@@ -309,6 +309,7 @@ Deno.serve(async (req) => {
 
     const categories: string[] = [];
     const categoryScores: Record<string, number> = {};
+    const timestamps: Array<{ timeOffset: number; categories: string[]; confidence: number }> = [];
     let flagged = false;
 
     // Explicit content
@@ -318,6 +319,16 @@ Deno.serve(async (req) => {
         const likelihood: string = f.pornographyLikelihood ?? 'UNKNOWN';
         const score = likelihoodToScore[likelihood] ?? 0.0;
         if (score > maxExplicitScore) maxExplicitScore = score;
+        
+        // Add timestamp for explicit content frames
+        if (score >= 0.75) {
+          const timeOffsetSeconds = parseFloat(f.timeOffset?.replace('s', '') || '0');
+          timestamps.push({
+            timeOffset: timeOffsetSeconds,
+            categories: ['sexual_explicit'],
+            confidence: score
+          });
+        }
       }
       categoryScores['sexual_explicit'] = Number(maxExplicitScore.toFixed(3));
       if (maxExplicitScore >= 0.75) {
@@ -368,6 +379,7 @@ Deno.serve(async (req) => {
       categoryScores,
       provider: 'google_video_intelligence',
       timestamp: new Date().toISOString(),
+      timestamps: timestamps.length > 0 ? timestamps : undefined,
     };
 
     return new Response(JSON.stringify(result), {

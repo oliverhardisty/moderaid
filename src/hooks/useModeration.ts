@@ -7,6 +7,11 @@ interface ModerationResult {
   categoryScores: Record<string, number>;
   provider: string;
   timestamp: string;
+  timestamps?: Array<{
+    timeOffset: number;
+    categories: string[];
+    confidence: number;
+  }>;
 }
 
 interface ModerationHook {
