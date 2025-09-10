@@ -83,196 +83,105 @@ const Index = () => {
     console.log('Starting content analysis...');
     setIsAnalyzing(true);
 
-    // Helper: read a local file to base64 (no data: prefix)
-    const fileToBase64 = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          const base64 = result.includes(',') ? result.split(',')[1] : result;
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-    // Helper: prompt user to pick a local video and return base64
-    const promptLocalVideoAsBase64 = async (): Promise<string | null> => {
-      toast({ title: 'Local video not reachable', description: 'Select the local file to analyze it securely in-browser.' });
-      try {
-        if ('showOpenFilePicker' in window) {
-          // @ts-ignore - File System Access API
-          const [handle] = await (window as any).showOpenFilePicker({
-            types: [{ description: 'Video', accept: { 'video/*': ['.mp4', '.webm', '.mov', '.mkv'] } }],
-            multiple: false,
-          });
-          const file = await handle.getFile();
-          return await fileToBase64(file);
-        }
-      } catch (e) {
-        console.warn('showOpenFilePicker failed, falling back to input:', e);
-      }
-
-      return await new Promise<string | null>((resolve) => {
-        const input = fileInputRef.current;
-        if (!input) return resolve(null);
-        const cleanup = () => {
-          input.value = '';
-          input.onchange = null;
-        };
-        input.onchange = async () => {
-          const file = input.files?.[0];
-          if (!file) {
-            cleanup();
-            return resolve(null);
-          }
-          try {
-            const b64 = await fileToBase64(file);
-            cleanup();
-            resolve(b64);
-          } catch (err) {
-            console.error('Failed reading file:', err);
-            cleanup();
-            resolve(null);
-          }
-        };
-        input.click();
-      });
-    };
-
     try {
-      console.log('Calling moderation APIs with content:', videoContent);
+      console.log('Checking moderation API status for content:', contentData.title);
 
-      // Run text-based checks, but do not fail overall if providers are misconfigured
-      let results: any = null;
-      try {
-        results = await moderateWithBoth(videoContent);
-      } catch (e) {
-        console.warn('Text moderation failed, continuing with video analysis:', e);
-        results = {
-          openai: { flagged: false, categories: [], categoryScores: {}, provider: 'openai', timestamp: new Date().toISOString() },
-          azure: { flagged: false, categories: [], categoryScores: {}, provider: 'azure', timestamp: new Date().toISOString() },
-          consensus: { flagged: false, categories: [], confidence: 'low' as const },
-        };
-      }
-
-      // Video checks (Google Video Intelligence)
-      const url = contentData.videoUrl as string | undefined;
-      let googleVideo: any = null;
-      if (url) {
-        try {
-          if (url.startsWith('gs://')) {
-            googleVideo = await moderateWithGoogleVideo(url);
-          } else if (url.includes('localhost')) {
-            // Try direct fetch first (works only if same-origin and reachable)
-            try {
-              const res = await fetch(url);
-              if (!res.ok) throw new Error('Fetch failed');
-              const buf = await res.arrayBuffer();
-              // Chunked to base64
-              let binary = '';
-              const bytes = new Uint8Array(buf);
-              const chunkSize = 0x8000;
-              for (let i = 0; i < bytes.length; i += chunkSize) {
-                const chunk = bytes.subarray(i, i + chunkSize);
-                binary += String.fromCharCode(...chunk);
-              }
-              const b64 = btoa(binary);
-              googleVideo = await moderateWithGoogleVideoContent(b64);
-            } catch {
-              // If the sandbox cannot reach localhost, ask user to pick the file
-              const b64 = await promptLocalVideoAsBase64();
-              if (b64) googleVideo = await moderateWithGoogleVideoContent(b64);
-            }
-          } else {
-            // Remote URL - let the edge function fetch and analyze
-            googleVideo = await moderateWithGoogleVideo(url);
-          }
-        } catch (e) {
-          console.warn('Google Video analysis failed:', e);
-        }
-      }
-
-      console.log('Moderation results received:', results, googleVideo);
-
+      // Create flags based on API availability and results
       const flags: any[] = [];
+      let hasValidApis = false;
 
-      if (results?.openai?.flagged) {
-        results.openai.categories.forEach((category: string, index: number) => {
-          const score = results.openai.categoryScores?.[category] || 0;
-          flags.push({
-            id: `openai-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-            status: 'active' as const,
-            confidence: Math.round(score * 100),
-            timestamp: new Date().toLocaleString(),
-            model: 'OpenAI Moderation API',
-            description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
+      // Test text-based moderation APIs
+      try {
+        const results = await moderateWithBoth(videoContent);
+        hasValidApis = true;
+        
+        if (results?.openai?.flagged) {
+          results.openai.categories.forEach((category: string, index: number) => {
+            const score = results.openai.categoryScores?.[category] || 0;
+            flags.push({
+              id: `openai-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'OpenAI Moderation API',
+              description: `OpenAI detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/c2e47eddddb0febc028c8752cdb97d2a6f99be13?placeholderIfAbsent=true'
+            });
           });
-        });
-      }
+        }
 
-      if (results?.azure?.flagged) {
-        results.azure.categories.forEach((category: string, index: number) => {
-          const score = results.azure.categoryScores?.[category] || 0;
-          flags.push({
-            id: `azure-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-            status: 'active' as const,
-            confidence: Math.round(score * 100),
-            timestamp: new Date().toLocaleString(),
-            model: 'Azure Content Safety',
-            description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+        if (results?.azure?.flagged) {
+          results.azure.categories.forEach((category: string, index: number) => {
+            const score = results.azure.categoryScores?.[category] || 0;
+            flags.push({
+              id: `azure-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'Azure Content Safety',
+              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            });
           });
-        });
-      }
-
-      if (googleVideo?.flagged) {
-        googleVideo.categories.forEach((category: string, index: number) => {
-          const score = googleVideo.categoryScores?.[category] || 0;
-          flags.push({
-            id: `gvi-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-            status: 'active' as const,
-            confidence: Math.round(score * 100),
-            timestamp: new Date().toLocaleString(),
-            model: 'Google Video Intelligence',
-            description: `Google Video Intelligence detected ${category} content with ${Math.round(score * 100)}% confidence`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-          });
-        });
-      }
-
-      if (flags.length === 0) {
+        }
+      } catch (e) {
+        console.warn('Text moderation APIs failed:', e);
+        // Show API configuration error
         flags.push({
-          id: 'clean-content',
+          id: 'api-config-error',
+          type: 'API Configuration Error',
+          status: 'active' as const,
+          confidence: 100,
+          timestamp: new Date().toLocaleString(),
+          model: 'System Check',
+          description: 'Moderation APIs not properly configured. Please check your OpenAI and Azure API credentials in Supabase secrets.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+        });
+      }
+
+      // If APIs worked and no violations found, show success message
+      if (hasValidApis && flags.length === 0) {
+        flags.push({
+          id: 'content-approved',
           type: 'Content Approved',
           status: 'dismissed' as const,
-          confidence: 89,
+          confidence: 95,
           timestamp: new Date().toLocaleString(),
-          model: 'Combined AI Analysis',
-          description: 'No policy violations detected by available providers.',
+          model: 'AI Content Analysis',
+          description: 'No policy violations detected. Content passed all moderation checks.',
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
 
       setModerationFlags(flags);
+      toast({
+        title: hasValidApis ? "Analysis Complete" : "API Configuration Required",
+        description: hasValidApis 
+          ? `Found ${flags.filter(f => f.status === 'active').length} flags for "${contentData.title}"`
+          : "Please configure your moderation API credentials in Supabase settings"
+      });
+      
     } catch (error) {
       console.error('Content analysis failed:', error);
       setModerationFlags([
         {
-          id: 'demo-analysis',
-          type: 'Analysis Error',
-          status: 'dismissed' as const,
+          id: 'analysis-failed',
+          type: 'Analysis Failed',
+          status: 'active' as const,
           confidence: 0,
           timestamp: new Date().toLocaleString(),
           model: 'Error Handler',
-          description: 'Content analysis failed. Using demo mode to show UI functionality.',
+          description: 'Unable to analyze content. Please check your internet connection and API configuration.',
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         }
       ]);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze content. Check console for details.",
+        variant: "destructive"
+      });
     } finally {
       setIsAnalyzing(false);
     }
