@@ -12,6 +12,7 @@ interface ModerationResult {
 interface ModerationHook {
   moderateWithGoogleVideo: (uri: string) => Promise<ModerationResult>;
   moderateWithGoogleVideoContent: (inputContentB64: string) => Promise<ModerationResult>;
+  moderateWithAzure: (content: string) => Promise<ModerationResult>;
   isLoading: boolean;
   error: string | null;
 }
@@ -65,9 +66,32 @@ export const useModeration = (): ModerationHook => {
     }
   };
  
+  const moderateWithAzure = async (content: string): Promise<ModerationResult> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('moderate-azure', {
+        body: { content },
+      });
+      if (error) {
+        console.error('Detailed Azure moderation error:', error);
+        throw new Error(`Azure Content Moderator failed: ${error.message || JSON.stringify(error)}`);
+      }
+      console.log('Azure moderation response:', data);
+      return data as ModerationResult;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     moderateWithGoogleVideo,
     moderateWithGoogleVideoContent,
+    moderateWithAzure,
     isLoading,
     error,
   };
