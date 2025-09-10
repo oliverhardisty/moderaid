@@ -62,7 +62,7 @@ const Index = () => {
     moderateWithAzure,
   } = useModeration();
   
-  const { contentItems } = useContentItems();
+  const { contentItems, loading: itemsLoading } = useContentItems();
 
   // Content data - use the same data as ContentList
   const currentContent = contentItems.find(item => item.id === `#${contentId}`) || contentItems[0];
@@ -103,38 +103,53 @@ const Index = () => {
     try {
       const flags: any[] = [];
 
-      // Try Google Video Intelligence first
+      // Try Google Video Intelligence first (skip if YouTube URL)
       if (contentData.videoUrl) {
-        try {
-          const googleResult = await moderateWithGoogleVideo(contentData.videoUrl);
-
-          if (googleResult?.flagged) {
-            googleResult.categories.forEach((category: string, index: number) => {
-              const score = googleResult.categoryScores?.[category] ?? 0;
-              flags.push({
-                id: `google-${category}-${index}`,
-                type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-                status: 'active' as const,
-                confidence: Math.round(score * 100),
-                timestamp: new Date().toLocaleString(),
-                model: 'Google Video Intelligence',
-                description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
-                icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-              });
-            });
-          }
-        } catch (googleError) {
-          console.warn('Google Video Intelligence failed:', googleError);
+        const urlLower = contentData.videoUrl.toLowerCase();
+        const isYouTube = urlLower.includes('youtube.com') || urlLower.includes('youtu.be');
+        if (isYouTube) {
           flags.push({
-            id: 'google-failed',
-            type: 'Google Analysis Failed',
+            id: 'google-skip-youtube',
+            type: 'Upload Required for Analysis',
             status: 'dismissed' as const,
             confidence: 0,
             timestamp: new Date().toLocaleString(),
             model: 'Google Video Intelligence',
-            description: 'Google Video Intelligence analysis failed. Falling back to Azure.',
+            description: 'Direct YouTube URLs are not supported. Please upload the video or use a direct file URL.',
             icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
+        } else {
+          try {
+            const googleResult = await moderateWithGoogleVideo(contentData.videoUrl);
+
+            if (googleResult?.flagged) {
+              googleResult.categories.forEach((category: string, index: number) => {
+                const score = googleResult.categoryScores?.[category] ?? 0;
+                flags.push({
+                  id: `google-${category}-${index}`,
+                  type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                  status: 'active' as const,
+                  confidence: Math.round(score * 100),
+                  timestamp: new Date().toLocaleString(),
+                  model: 'Google Video Intelligence',
+                  description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
+                  icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+                });
+              });
+            }
+          } catch (googleError) {
+            console.warn('Google Video Intelligence failed:', googleError);
+            flags.push({
+              id: 'google-failed',
+              type: 'Google Analysis Failed',
+              status: 'dismissed' as const,
+              confidence: 0,
+              timestamp: new Date().toLocaleString(),
+              model: 'Google Video Intelligence',
+              description: 'Google Video Intelligence analysis failed. Falling back to Azure.',
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+            });
+          }
         }
       }
 
@@ -237,10 +252,12 @@ const Index = () => {
     });
   };
 
-  // Auto-analyze content on mount
+  // Auto-analyze when content is loaded and URL available
   useEffect(() => {
-    analyzeContent();
-  }, [contentData.videoUrl]);
+    if (!itemsLoading && contentData.videoUrl) {
+      analyzeContent();
+    }
+  }, [itemsLoading, contentData.videoUrl]);
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
