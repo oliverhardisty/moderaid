@@ -23,6 +23,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   videoUrl 
 }) => {
   const playerRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -64,7 +65,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handlePlayPause = () => {
-    if (playerRef.current && isPlayerReady) {
+    if (isDirectMedia && videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    } else if (playerRef.current && isPlayerReady) {
       if (isPlaying) {
         playerRef.current.pauseVideo();
       } else {
@@ -74,7 +81,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (playerRef.current && isPlayerReady) {
+    if (isDirectMedia && videoRef.current) {
+      const volumePercent = newVolume * 100;
+      videoRef.current.volume = newVolume;
+      setVolume(volumePercent);
+    } else if (playerRef.current && isPlayerReady) {
       const volumePercent = newVolume * 100;
       playerRef.current.setVolume(volumePercent);
       setVolume(volumePercent);
@@ -82,7 +93,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handleProgressChange = (newProgress: number) => {
-    if (playerRef.current && isPlayerReady && duration > 0) {
+    if (isDirectMedia && videoRef.current && duration > 0) {
+      const newTime = (newProgress / 100) * duration;
+      videoRef.current.currentTime = newTime;
+      setProgress(newProgress);
+    } else if (playerRef.current && isPlayerReady && duration > 0) {
       const newTime = (newProgress / 100) * duration;
       playerRef.current.seekTo(newTime);
       setProgress(newProgress);
@@ -177,10 +192,31 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ) : isDirectMedia ? (
           // Direct media (MP4/WEBM/OGG)
           <video
+            ref={videoRef}
             src={processedVideoUrl}
             className="w-full h-full"
-            controls
             preload="metadata"
+            onLoadedMetadata={() => {
+              if (videoRef.current) {
+                setDuration(videoRef.current.duration);
+                setVolume(videoRef.current.volume * 100);
+                setIsPlayerReady(true);
+              }
+            }}
+            onTimeUpdate={() => {
+              if (videoRef.current) {
+                setCurrentTime(videoRef.current.currentTime);
+                const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+                setProgress(progress || 0);
+              }
+            }}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onVolumeChange={() => {
+              if (videoRef.current) {
+                setVolume(videoRef.current.volume * 100);
+              }
+            }}
           />
         ) : (
           // YouTube Video Player Container
@@ -214,8 +250,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       </div>
       
-       {!isDirectMedia && (
-         <>
         {/* Video Controls */}
         <div className="bg-white p-4 space-y-2">
          {/* Progress Bar */}
@@ -310,8 +344,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
            </div>
          </div>
         </div>
-        </>
-       )}
 
      </div>
    );
