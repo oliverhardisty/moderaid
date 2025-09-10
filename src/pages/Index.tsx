@@ -301,47 +301,59 @@ const Index = () => {
 
   // Use stored moderation results if available, otherwise auto-analyze
   useEffect(() => {
-    if (!itemsLoading && currentContent?.moderation_result) {
-      // Use stored results from automated checks
-      const result = currentContent.moderation_result;
-      const flags: any[] = [];
-      
-      if (result.flagged) {
-        result.categories.forEach((category: string, index: number) => {
-          const score = result.categoryScores?.[category] ?? 0;
+    console.log('Content moderation check:', {
+      itemsLoading,
+      currentContent: currentContent?.id,
+      hasModerationResult: !!currentContent?.moderation_result,
+      moderationStatus: currentContent?.moderation_status,
+      videoUrl: contentData.videoUrl
+    });
+
+    if (!itemsLoading && currentContent) {
+      // Always use stored results if available and moderation is complete
+      if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
+        console.log('Using stored moderation results for:', currentContent.id);
+        const result = currentContent.moderation_result;
+        const flags: any[] = [];
+        
+        if (result.flagged) {
+          result.categories.forEach((category: string, index: number) => {
+            const score = result.categoryScores?.[category] ?? 0;
+            flags.push({
+              id: `google-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date(result.timestamp).toLocaleString(),
+              model: 'Google Video Intelligence',
+              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            });
+          });
+        }
+        
+        if (flags.length === 0) {
           flags.push({
-            id: `google-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-            status: 'active' as const,
-            confidence: Math.round(score * 100),
+            id: 'content-approved',
+            type: 'Content Approved',
+            status: 'dismissed' as const,
+            confidence: 95,
             timestamp: new Date(result.timestamp).toLocaleString(),
             model: 'Google Video Intelligence',
-            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            description: 'No policy violations detected. Content passed all moderation checks.',
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
-        });
+        }
+        
+        setModerationFlags(flags);
+        setIsAnalyzing(false);
+      } else if (contentData.videoUrl && (!currentContent.moderation_result || currentContent.moderation_status !== 'completed')) {
+        // Only analyze if no stored results or analysis not complete
+        console.log('No stored results found, running analysis for:', currentContent.id);
+        analyzeContent();
       }
-      
-      if (flags.length === 0) {
-        flags.push({
-          id: 'content-approved',
-          type: 'Content Approved',
-          status: 'dismissed' as const,
-          confidence: 95,
-          timestamp: new Date(result.timestamp).toLocaleString(),
-          model: 'Google Video Intelligence',
-          description: 'No policy violations detected. Content passed all moderation checks.',
-          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
-        });
-      }
-      
-      setModerationFlags(flags);
-      setIsAnalyzing(false);
-    } else if (!itemsLoading && contentData.videoUrl && (!currentContent?.moderation_result)) {
-      // Fall back to re-analyzing if no stored results
-      analyzeContent();
     }
-  }, [itemsLoading, contentData.videoUrl, currentContent?.moderation_result]);
+  }, [itemsLoading, currentContent?.id, currentContent?.moderation_status, currentContent?.moderation_result]);
   const handleSidebarToggle = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
