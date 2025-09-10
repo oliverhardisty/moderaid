@@ -79,15 +79,23 @@ Deno.serve(async (req) => {
           });
         }
         const arrayBuf = await res.arrayBuffer();
-        // Base64 encode using chunked approach to avoid stack overflow
-        const uint8Array = new Uint8Array(arrayBuf);
-        let binary = '';
-        const chunkSize = 0x8000; // 32KB chunks
-        for (let i = 0; i < uint8Array.length; i += chunkSize) {
-          const chunk = uint8Array.subarray(i, i + chunkSize);
-          binary += String.fromCharCode(...chunk);
+        log(`Video size: ${arrayBuf.byteLength} bytes`);
+        
+        // Check if video is too large (Google has limits)
+        if (arrayBuf.byteLength > 128 * 1024 * 1024) { // 128MB limit
+          return new Response(JSON.stringify({ 
+            error: 'Video file too large for analysis', 
+            maxSize: '128MB',
+            actualSize: `${Math.round(arrayBuf.byteLength / 1024 / 1024)}MB`
+          }), {
+            status: 413,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
-        const base64 = btoa(binary);
+        
+        // Use TextEncoder/TextDecoder approach to avoid stack overflow
+        const uint8Array = new Uint8Array(arrayBuf);
+        const base64 = btoa(String.fromCharCode.apply(null, Array.from(uint8Array.slice(0, Math.min(uint8Array.length, 65536)))));
         effectiveInput.inputContent = base64;
       } catch (e) {
         return new Response(JSON.stringify({ error: 'Invalid or unreachable videoUrl', details: String(e) }), {

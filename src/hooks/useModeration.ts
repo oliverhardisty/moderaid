@@ -25,10 +25,15 @@ export const useModeration = (): ModerationHook => {
     setError(null);
     try {
       const body: any = uri.startsWith('gs://') ? { gcsUri: uri } : { videoUrl: uri };
+      console.log('Sending moderation request:', body);
       const { data, error } = await supabase.functions.invoke('moderate-video', {
         body,
       });
-      if (error) throw new Error(`Google Video Intelligence failed: ${error.message}`);
+      if (error) {
+        console.error('Detailed edge function error:', error);
+        throw new Error(`Google Video Intelligence failed: ${error.message || JSON.stringify(error)}`);
+      }
+      console.log('Moderation response:', data);
       return data as ModerationResult;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -46,7 +51,10 @@ export const useModeration = (): ModerationHook => {
       const { data, error } = await supabase.functions.invoke('moderate-video', {
         body: { inputContentB64 },
       });
-      if (error) throw new Error(`Google Video Intelligence failed: ${error.message}`);
+      if (error) {
+        console.error('Detailed edge function error:', error);
+        throw new Error(`Google Video Intelligence failed: ${error.message || JSON.stringify(error)}`);
+      }
       return data as ModerationResult;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
