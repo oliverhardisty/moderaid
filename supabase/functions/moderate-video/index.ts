@@ -277,7 +277,7 @@ Deno.serve(async (req) => {
     const maxAttempts = 40; // ~2 minutes max if 3s interval
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const opRes = await fetch(
-        `https://videointelligence.googleapis.com/v1/${encodeURIComponent(operationName)}`,
+        `https://videointelligence.googleapis.com/v1/${operationName}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       const opJson = await opRes.json();
