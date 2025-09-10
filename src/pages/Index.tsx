@@ -212,6 +212,14 @@ const Index = () => {
         });
       }
       setModerationFlags(flags);
+      
+      // Debug log the final flags array
+      console.log('Final moderation flags with timestamps:', flags.map(f => ({
+        type: f.type,
+        timestampsCount: f.timestamps?.length || 0,
+        hasTimestamps: !!f.timestamps
+      })));
+      
       const activeFlags = flags.filter(f => f.status === 'active').length;
       toast({
         title: "Analysis Complete",
@@ -300,17 +308,24 @@ const Index = () => {
             ts.categories.includes(category)
           ) || [];
           
-          flags.push({
-            id: `google-${category}-${index}`,
-            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-            status: 'active' as const,
-            confidence: Math.round(score * 100),
-            timestamp: new Date().toLocaleString(),
-            model: 'Google Video Intelligence',
-            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
-            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
-            timestamps: categoryTimestamps
-          });
+            flags.push({
+              id: `google-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'Google Video Intelligence',
+              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
+              timestamps: categoryTimestamps
+            });
+            
+            // Debug log for timestamps
+            console.log(`Created flag for ${category}:`, {
+              category,
+              timestampsCount: categoryTimestamps.length,
+              timestamps: categoryTimestamps
+            });
         });
       }
       if (flags.length === 0) {
