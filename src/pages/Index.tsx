@@ -278,6 +278,16 @@ const Index = () => {
     }
   };
 
+  // Function to reset automated flags
+  const resetFlags = () => {
+    console.log('Resetting automated flags for content:', contentData.id);
+    setModerationFlags([]);
+    toast({
+      title: "Flags Reset",
+      description: "All automated flags have been cleared for this content.",
+    });
+  };
+
   // Auto-analyze content on mount
   useEffect(() => {
     analyzeContent();
@@ -380,7 +390,15 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} />
+                <FlagsPanel 
+                  flags={moderationFlags} 
+                  userReports={3} 
+                  uploaderStatus="good" 
+                  moderationHistory={3} 
+                  isAnalyzing={isAnalyzing} 
+                  onRunAnalysis={analyzeContent}
+                  onResetFlags={resetFlags}
+                />
               </div>
             </Panel>
             
