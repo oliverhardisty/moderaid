@@ -274,7 +274,7 @@ Deno.serve(async (req) => {
 
     // Poll operation until done
     let responseJson: any | null = null;
-    const maxAttempts = 40; // ~2 minutes max if 3s interval
+    const maxAttempts = 60; // ~60 seconds max with 1s interval
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const opRes = await fetch(
         `https://videointelligence.googleapis.com/v1/${operationName}`,
@@ -293,7 +293,7 @@ Deno.serve(async (req) => {
         responseJson = opJson.response;
         break;
       }
-      await sleep(3000);
+      await sleep(1000);
     }
 
     if (!responseJson) {

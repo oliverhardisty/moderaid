@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, X, CheckCircle } from 'lucide-react';
+import { useModeration } from '@/hooks/useModeration';
 
 interface VideoUploadDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export const VideoUploadDialog: React.FC<VideoUploadDialogProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
   const { toast } = useToast();
+  const { moderateWithGoogleVideo } = useModeration();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -152,6 +154,25 @@ export const VideoUploadDialog: React.FC<VideoUploadDialogProps> = ({
         title: "Upload successful!",
         description: "Your video has been uploaded successfully.",
       });
+
+      // Kick off moderation checks in the background (non-blocking)
+      try {
+        toast({
+          title: "Starting moderation checks",
+          description: "Running video safety analysis in the background.",
+        });
+        // Fire and forget
+        void (async () => {
+          try {
+            await moderateWithGoogleVideo(publicUrl);
+            toast({ title: "Moderation checks complete", description: "Analysis finished." });
+          } catch (e) {
+            console.warn('Background moderation failed:', e);
+          }
+        })();
+      } catch (e) {
+        console.warn('Unable to start background moderation:', e);
+      }
 
       // Reset form after a delay
       setTimeout(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
 import { Search, Plus, Flag, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContentItems } from '@/hooks/useContentItems';
+import { useModeration } from '@/hooks/useModeration';
 
 interface ContentItem {
   id: string;
@@ -39,8 +40,19 @@ const ContentList = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
   const { contentItems, loading, refetch } = useContentItems();
+  const { moderateWithGoogleVideo } = useModeration();
+  const prefetchStartedRef = useRef(false);
 
-
+  // Prefetch moderation for the first available item (starts before viewing)
+  useEffect(() => {
+    if (!loading && !prefetchStartedRef.current && contentItems.length > 0) {
+      const firstWithUrl = contentItems.find((i) => i.video_url);
+      if (firstWithUrl?.video_url) {
+        prefetchStartedRef.current = true;
+        void moderateWithGoogleVideo(firstWithUrl.video_url);
+      }
+    }
+  }, [loading, contentItems, moderateWithGoogleVideo]);
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
