@@ -37,7 +37,7 @@ const Index = () => {
     views: 15781,
     userReports: 12,
     priority: 'high' as const,
-    videoUrl: 'gs://cloud-samples-data/video/cat.mp4'
+    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
   }, {
     id: '#77889',
     title: 'Cooking Tutorial - Italian Pasta',
@@ -45,7 +45,7 @@ const Index = () => {
     views: 1685,
     userReports: 0,
     priority: 'medium' as const,
-    videoUrl: 'gs://cloud-samples-data/video/cat.mp4'
+    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
   }, {
     id: '#99001',
     title: 'DIY Home Improvement Tips',
@@ -53,7 +53,7 @@ const Index = () => {
     views: 562,
     userReports: 1,
     priority: 'low' as const,
-    videoUrl: 'gs://cloud-samples-data/video/cat.mp4'
+    videoUrl: 'https://storage.googleapis.com/cloud-samples-data/video/cat.mp4'
   }];
   const currentContent = allContentItems.find(item => item.id === `#${contentId}`) || allContentItems[0];
   const contentData = {

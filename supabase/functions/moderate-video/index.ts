@@ -71,31 +71,36 @@ Deno.serve(async (req) => {
           );
         }
         // Fetch remote video and convert to base64
-        const res = await fetch(videoUrl);
+        const res = await fetch(videoUrl, { method: 'GET' });
         if (!res.ok) {
-          return new Response(JSON.stringify({ error: 'Failed to fetch video from URL' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
+          log('Failed to fetch video', { status: res.status, statusText: res.statusText, url: videoUrl });
+          return new Response(
+            JSON.stringify({ error: 'Failed to fetch video from URL', status: res.status, statusText: res.statusText }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
         const arrayBuf = await res.arrayBuffer();
         log(`Video size: ${arrayBuf.byteLength} bytes`);
-        
-        // Check if video is too large (Google has limits)
-        if (arrayBuf.byteLength > 128 * 1024 * 1024) { // 128MB limit
-          return new Response(JSON.stringify({ 
-            error: 'Video file too large for analysis', 
-            maxSize: '128MB',
-            actualSize: `${Math.round(arrayBuf.byteLength / 1024 / 1024)}MB`
-          }), {
-            status: 413,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
+
+        // Reject very large files to prevent timeouts/memory pressure
+        const maxBytes = 20 * 1024 * 1024; // 20MB
+        if (arrayBuf.byteLength > maxBytes) {
+          return new Response(
+            JSON.stringify({ error: 'Video too large', maxBytes, actualBytes: arrayBuf.byteLength }),
+            { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
-        
-        // Use TextEncoder/TextDecoder approach to avoid stack overflow
+
+        // Base64 encode using safe chunking to avoid stack overflow
         const uint8Array = new Uint8Array(arrayBuf);
-        const base64 = btoa(String.fromCharCode.apply(null, Array.from(uint8Array.slice(0, Math.min(uint8Array.length, 65536)))));
+        let binary = '';
+        const chunkSize = 0x8000; // 32KB
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          const chunk = uint8Array.subarray(i, i + chunkSize);
+          binary += String.fromCharCode(...chunk);
+        }
+        const base64 = btoa(binary);
+        effectiveInput.inputContent = base64;
         effectiveInput.inputContent = base64;
       } catch (e) {
         return new Response(JSON.stringify({ error: 'Invalid or unreachable videoUrl', details: String(e) }), {
