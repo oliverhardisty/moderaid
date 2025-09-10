@@ -290,6 +290,16 @@ const ContentList = () => {
           onOpenChange={setUploadDialogOpen}
           onUploadComplete={handleUploadComplete}
         />
+
+        {/* Moderate by URL Dialog */}
+        <ModerateByUrlDialog
+          open={urlDialogOpen}
+          onOpenChange={setUrlDialogOpen}
+          onComplete={handleUploadComplete}
+          initialUrl={initialUrl}
+          initialTitle={initialTitle}
+          autoStart={Boolean(initialUrl)}
+        />
       </main>
     </div>
   );
