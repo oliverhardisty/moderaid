@@ -166,7 +166,37 @@ const Index = () => {
         }
       }
 
-      // Azure moderation temporarily disabled per request
+      // Add Azure moderation for text content
+      try {
+        const azureResult = await moderateWithAzure(videoContent);
+        if (azureResult?.flagged) {
+          azureResult.categories.forEach((category: string, index: number) => {
+            const score = azureResult.categoryScores?.[category] ?? 0;
+            flags.push({
+              id: `azure-${category}-${index}`,
+              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+              status: 'active' as const,
+              confidence: Math.round(score * 100),
+              timestamp: new Date().toLocaleString(),
+              model: 'Azure Content Safety',
+              description: `Azure detected ${category} content with ${Math.round(score * 100)}% confidence`,
+              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+            });
+          });
+        }
+      } catch (azureError) {
+        console.warn('Azure Content Safety failed:', azureError);
+        flags.push({
+          id: 'azure-failed',
+          type: 'Azure Analysis Failed',
+          status: 'dismissed' as const,
+          confidence: 0,
+          timestamp: new Date().toLocaleString(),
+          model: 'Azure Content Safety',
+          description: 'Azure Content Safety analysis failed.',
+          icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
+        });
+      }
 
       // If no flags were generated, add a content approved flag
       if (flags.length === 0 || flags.every(f => f.status === 'dismissed')) {
