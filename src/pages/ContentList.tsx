@@ -113,13 +113,6 @@ const ContentList = () => {
   };
 
   const handleContentClick = (contentId: string) => {
-    if (moderationInProgress) {
-      toast({
-        title: "Analysis in progress",
-        description: "Please wait for automated moderation checks to complete before viewing content details.",
-      });
-      return;
-    }
     // Remove the # symbol and navigate with the clean ID
     const cleanId = contentId.replace('#', '');
     navigate(`/content/${cleanId}`);
