@@ -554,7 +554,7 @@ const Index = () => {
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
 
 
-        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
+        <div className="flex-1 flex flex-col pt-16 pb-20 h-screen overflow-hidden">
           {/* Content Area */}
           <div className="flex-1 flex overflow-hidden">
             {/* Left Section - Tab Section */}
