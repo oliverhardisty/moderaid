@@ -73,7 +73,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         <TabsTrigger value="activity" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Activity</TabsTrigger>
       </TabsList>
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full">
           <TabsContent value="ai-flags" className="mt-4 space-y-4 px-3">
         <div className="space-y-3">
@@ -211,23 +211,24 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         </div>
       </TabsContent>
         </ScrollArea>
+        
+        {/* Global action button - moved inside scroll area */}
+        {!isAnalyzing && onRunAnalysis && (
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-white">
+            <button
+              onClick={onRunAnalysis}
+              disabled={isAnalyzing}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 bg-white border border-purple-600 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+              aria-label="Run checks again"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Run checks again
+            </button>
+          </div>
+        )}
       </div>
-      {/* Global action button - visible on all tabs */}
-      {!isAnalyzing && onRunAnalysis && (
-        <div className="fixed bottom-[64px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 0.75rem)` }}>
-          <button
-            onClick={onRunAnalysis}
-            disabled={isAnalyzing}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 bg-white border border-purple-600 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
-            aria-label="Run checks again"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Run checks again
-          </button>
-        </div>
-      )}
     </Tabs>
   );
 };
