@@ -570,7 +570,7 @@ const Index = () => {
             
             {/* Right Section - Media Player Section */}
             <Panel defaultSize={70} minSize={40} className="h-full">
-              <div className="px-4 py-4 h-full overflow-hidden flex flex-col">
+              <div className="px-4 pt-2 pb-4 h-full overflow-hidden flex flex-col">
                 <div className="flex-1 flex flex-col gap-4 min-h-0 h-full">
                   {/* View Toggle - moved from header */}
                   <div className="flex justify-end">
