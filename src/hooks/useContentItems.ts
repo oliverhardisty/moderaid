@@ -74,19 +74,6 @@ export const useContentItems = () => {
       moderation_status: 'pending'
     },
     {
-      id: '#12345',
-      title: 'Violence Detection Test',
-      upload_date: 'Mar 10, 2024',
-      views: 8952,
-      user_reports: 5,
-      priority: 'high',
-      status: 'pending',
-      video_url: 'https://example.com/test-video-2.mp4',
-      created_at: '2024-03-10T00:00:00Z',
-      updated_at: '2024-03-10T00:00:00Z',
-      moderation_status: 'pending'
-    },
-    {
       id: '#54321',
       title: 'Safe Content Example',
       upload_date: 'Mar 8, 2024',
