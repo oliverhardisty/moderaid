@@ -556,7 +556,7 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
           {/* Content Area */}
-          <div className="flex-1 px-4 pb-4 overflow-auto py-[16px]">
+          <div className="flex-1 px-4 pb-4 py-[16px] overflow-hidden">
             <PanelGroup direction="horizontal" className="h-full min-h-0">
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
