@@ -283,15 +283,6 @@ const Index = () => {
     }
   };
 
-  const resetFlags = () => {
-    console.log('Resetting automated flags for content:', contentData.id);
-    setModerationFlags([]);
-    toast({
-      title: "Flags Reset",
-      description: "All automated flags have been cleared for this content."
-    });
-  };
-
   // Test Azure API - removed as per user request
 
   // Handle local file selection -> upload to Supabase then analyze
@@ -565,7 +556,7 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onResetFlags={resetFlags} />
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} />
               </div>
             </Panel>
             
