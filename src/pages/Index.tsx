@@ -26,7 +26,6 @@ const Index = () => {
   const [isCompactView, setIsCompactView] = useState(false);
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
   const [seekFunction, setSeekFunction] = useState<((timeInSeconds: number) => void) | null>(null);
-  const [savedPanelSizes, setSavedPanelSizes] = useState<{ left: number; right: number } | null>(null);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -494,31 +493,17 @@ const Index = () => {
   };
   const toggleCompactView = () => {
     const newCompactView = !isCompactView;
+    setIsCompactView(newCompactView);
     
-    // Get current panel sizes before changing them
-    const currentLeftSize = leftPanelRef.current?.getSize();
-    const currentRightSize = rightPanelRef.current?.getSize();
-    
-    if (!newCompactView) {
-      // Switching to normal view (left option): restore saved sizes or use current sizes
-      if (savedPanelSizes) {
-        leftPanelRef.current?.resize(savedPanelSizes.left);
-        rightPanelRef.current?.resize(savedPanelSizes.right);
-      } else {
-        // If no saved sizes, use current sizes
-        // This happens on first toggle - current sizes become the "normal" state
-      }
-    } else {
-      // Switching to compact view (right option): save current sizes and set minimum width
-      if (currentLeftSize !== undefined && currentRightSize !== undefined) {
-        setSavedPanelSizes({ left: currentLeftSize, right: currentRightSize });
-      }
-      // Set media player to minimum width (40%) and adjust left panel accordingly
+    if (newCompactView) {
+      // Right option (compact view): Set media player to minimum width (40%)
       rightPanelRef.current?.resize(40);
       leftPanelRef.current?.resize(60);
+    } else {
+      // Left option (normal view): Use current widths as the restored state
+      // Don't change sizes when switching to normal view - keep current manual adjustments
+      // This preserves whatever the user manually set with the resize handle
     }
-    
-    setIsCompactView(newCompactView);
   };
   const handleAccept = async () => {
     setIsProcessing(true);
