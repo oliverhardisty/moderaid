@@ -571,17 +571,25 @@ const Index = () => {
             {/* Right Section - Media Player Section */}
             <Panel defaultSize={70} minSize={40} className="min-h-0">
               <div className="px-4 py-4 h-full overflow-hidden flex flex-col min-h-0">
-                <div className="flex flex-col gap-4 h-full">
-                  <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
+                <div className="flex-1 flex flex-col gap-4 min-h-0">
+                  <div className="flex-1 min-h-0">
+                    <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
+                  </div>
                   
                   {/* Timestamp Markers */}
-                  {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
-                    // This would seek the video to the timestamp
-                    console.log('Seeking to:', time);
-                  }} videoDuration={60} // Would need to get actual duration from video player
-                  />}
+                  {currentModerationResult?.timestamps && (
+                    <div className="flex-shrink-0">
+                      <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
+                        // This would seek the video to the timestamp
+                        console.log('Seeking to:', time);
+                      }} videoDuration={60} // Would need to get actual duration from video player
+                      />
+                    </div>
+                  )}
                   
-                  <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
+                  <div className="flex-shrink-0">
+                    <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
+                  </div>
                 </div>
               </div>
             </Panel>
