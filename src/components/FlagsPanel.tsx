@@ -64,10 +64,10 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
 
   return (
     <Tabs defaultValue="ai-flags" className="h-full">
-      <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
-        <TabsTrigger value="ai-flags" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">AI flags</TabsTrigger>
-        <TabsTrigger value="reports" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">Reports</TabsTrigger>
-        <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">Activity</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto border-b border-gray-200">
+        <TabsTrigger value="ai-flags" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">AI flags</TabsTrigger>
+        <TabsTrigger value="reports" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Reports</TabsTrigger>
+        <TabsTrigger value="activity" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Activity</TabsTrigger>
       </TabsList>
       
       <TabsContent value="ai-flags" className="mt-4 space-y-4">
