@@ -543,18 +543,18 @@ const Index = () => {
       setIsProcessing(false);
     }
   };
-  return <div className="flex min-h-screen bg-gray-50">
+  return <div className={`flex min-h-screen bg-gray-50 transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
       {/* Sidebar */}
       <Sidebar isExpanded={sidebarExpanded} onToggle={handleSidebarToggle} />
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
+      <main className="flex-1 flex flex-col transition-all duration-300 overflow-hidden">
         {/* Header */}
         <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} isCompactView={isCompactView} onToggleCompactView={toggleCompactView} />
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
 
 
-        <div className="flex-1 flex flex-col pt-16 pb-20 h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Content Area */}
           <div className="flex-1 flex overflow-hidden">
             <PanelGroup direction="horizontal" className="h-full min-h-0">
