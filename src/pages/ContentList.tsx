@@ -235,7 +235,7 @@ const ContentList = () => {
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Content title</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Content ID</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Moderation ID</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Upload Date</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Views</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">User reports</th>
