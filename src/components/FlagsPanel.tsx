@@ -22,6 +22,7 @@ interface FlagsPanelProps {
   isAnalyzing?: boolean;
   onRunAnalysis?: () => void;
   onSeekToTimestamp?: ((timeInSeconds: number) => void) | null;
+  sidebarExpanded?: boolean;
 }
 
 export const FlagsPanel: React.FC<FlagsPanelProps> = ({ 
@@ -31,7 +32,8 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   moderationHistory,
   isAnalyzing = false,
   onRunAnalysis,
-  onSeekToTimestamp
+  onSeekToTimestamp,
+  sidebarExpanded
 }) => {
   console.log('FlagsPanel received flags:', flags.map(f => ({
     type: f.type,
@@ -207,7 +209,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
       </TabsContent>
       {/* Global action button - visible on all tabs */}
       {!isAnalyzing && onRunAnalysis && (
-        <div className="fixed left-6 bottom-[88px] z-50">
+        <div className="fixed bottom-[96px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 1.5rem)` }}>
           <button
             onClick={onRunAnalysis}
             disabled={isAnalyzing}
