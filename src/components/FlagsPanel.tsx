@@ -180,46 +180,28 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     
                     {/* Show timestamps if available */}
                     {flag.timestamps && flag.timestamps.length > 0 && (
-                      <div className="mt-3 border-t border-gray-200 pt-3">
-                        <div className="text-xs font-medium text-gray-800 mb-2 flex items-center gap-1">
-                          <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <span className="text-blue-600">Violation timestamps ({flag.timestamps.length}):</span>
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <div className="text-xs font-medium text-blue-600 mb-1">
+                          Violation timestamps ({flag.timestamps.length}):
                         </div>
-                        <div className="space-y-2">
+                        <div className="text-xs text-gray-700">
                           {flag.timestamps.map((timestamp: any, idx: number) => (
-                            <div key={idx} className="flex items-center justify-between text-xs bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                                  <span className="font-mono font-medium text-gray-900">
-                                    {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <span className="text-gray-500">Confidence:</span>
-                                  <span className="text-red-600 font-medium">
-                                    {Math.round(timestamp.confidence * 100)}%
-                                  </span>
-                                </div>
-                              </div>
+                            <span key={idx} className="inline-flex items-center gap-1 mr-3 mb-1">
+                              <span className="font-mono font-medium">
+                                {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
+                              </span>
+                              <span className="text-gray-500">({Math.round(timestamp.confidence * 100)}%)</span>
                               <button 
-                                className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-medium transition-colors"
+                                className="text-blue-600 hover:text-blue-800 underline"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // This would trigger video seeking - implement based on your video player setup
                                   console.log('Seek to timestamp:', timestamp.timeOffset, 'seconds');
-                                  // TODO: Integrate with video player to seek to this time
                                 }}
                               >
-                                Jump to
+                                jump
                               </button>
-                            </div>
+                            </span>
                           ))}
-                        </div>
-                        <div className="mt-2 text-xs text-gray-500 italic">
-                          Click "Jump to" to navigate to specific violation moments in the video
                         </div>
                       </div>
                     )}
