@@ -190,8 +190,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [isPlayerReady]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="relative aspect-video bg-gray-900 rounded-t-lg overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+      <div className="relative flex-1 bg-gray-900 rounded-t-lg overflow-hidden">
         {/* Video Player Container */}
         {isGoogleDrive ? (
           // Google Drive iframe
