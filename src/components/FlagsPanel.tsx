@@ -214,7 +214,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
       </div>
       {/* Global action button - visible on all tabs */}
       {!isAnalyzing && onRunAnalysis && (
-        <div className="fixed bottom-[20px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 0.75rem)` }}>
+        <div className="fixed bottom-[64px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 0.75rem)` }}>
           <button
             onClick={onRunAnalysis}
             disabled={isAnalyzing}
