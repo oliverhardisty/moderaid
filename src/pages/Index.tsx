@@ -560,29 +560,17 @@ const Index = () => {
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
         {/* Header */}
-        <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} />
+        <Header 
+          contentId={contentData.id} 
+          priority={contentData.priority} 
+          sidebarExpanded={sidebarExpanded}
+          isCompactView={isCompactView}
+          onToggleCompactView={toggleCompactView}
+        />
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={(e) => handleFileChange(e)} />
 
 
-        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden py-[56px]">
-          {/* View Toggle */}
-          <div className="px-4 pb-2 pt-2 flex justify-end items-center flex-shrink-0">
-          <div className="inline-flex bg-gray-100 rounded-lg p-1">
-            <button onClick={() => !isCompactView || toggleCompactView()} className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${!isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
-                <rect x="6.23047" y="3.08093" width="11.5454" height="8.08487" rx="1" fill="currentColor" />
-              </svg>
-            </button>
-            <button onClick={() => isCompactView || toggleCompactView()} className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1.27246" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
-                <rect x="10.7349" y="2.96021" width="7.48682" height="5.70145" rx="1" fill="currentColor" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
+        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
           {/* Content Area */}
           <div className="flex-1 px-4 pb-4 overflow-auto">
             <PanelGroup direction="horizontal" className="h-full min-h-0">

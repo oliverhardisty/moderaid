@@ -7,9 +7,11 @@ interface HeaderProps {
   priority: 'high' | 'medium' | 'low';
   itemCount?: number;
   sidebarExpanded?: boolean;
+  isCompactView?: boolean;
+  onToggleCompactView?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, sidebarExpanded = false }) => {
+export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, sidebarExpanded = false, isCompactView = false, onToggleCompactView }) => {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -69,6 +71,30 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, 
       </div>
 
       <div className="flex items-center gap-2">
+        {/* View Toggle - only show on content detail pages */}
+        {showBackButton && onToggleCompactView && (
+          <div className="inline-flex bg-gray-100 rounded-lg p-1 mr-3">
+            <button 
+              onClick={() => !isCompactView && onToggleCompactView()} 
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${!isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
+                <rect x="6.23047" y="3.08093" width="11.5454" height="8.08487" rx="1" fill="currentColor" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => isCompactView && onToggleCompactView()} 
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1.27246" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
+                <rect x="10.7349" y="2.96021" width="7.48682" height="5.70145" rx="1" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        )}
+        
         <button 
           onClick={handleCopy}
           className="flex items-center gap-2 text-purple-600 border border-purple-600 bg-white hover:bg-purple-50 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
