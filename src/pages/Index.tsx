@@ -556,22 +556,15 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
           {/* Content Area */}
-          <div className="flex-1 px-4 pb-4 py-[16px] overflow-hidden">
-            <PanelGroup direction="horizontal" className="h-full min-h-0">
-            {/* Left Panel - Flags and Reports */}
-            <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
-              <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
-              </div>
-            </Panel>
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left Section - Tab Section */}
+            <div className="w-1/3 min-w-80 px-4 py-4 h-full">
+              <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
+            </div>
             
-            <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-gray-300 transition-colors cursor-col-resize flex items-center justify-center">
-              <div className="w-1 h-8 bg-gray-400 rounded-full"></div>
-            </PanelResizeHandle>
-
-            {/* Right Panel - Video Player and Metadata */}
-            <Panel ref={rightPanelRef} defaultSize={70} minSize={40}>
-              <div className="flex flex-col gap-4 h-full pl-4">
+            {/* Right Section - Media Player Section */}
+            <div className="flex-1 px-4 py-4 h-full">
+              <div className="flex flex-col gap-4 h-full">
                 <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
                 
                 {/* Timestamp Markers */}
@@ -583,8 +576,7 @@ const Index = () => {
                 
                 <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
               </div>
-            </Panel>
-          </PanelGroup>
+            </div>
           </div>
         </div>
 
