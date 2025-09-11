@@ -207,7 +207,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
       </TabsContent>
       {/* Global action button - visible on all tabs */}
       {!isAnalyzing && onRunAnalysis && (
-        <div className="fixed bottom-6 left-6 z-50">
+        <div className="fixed left-6 bottom-[88px] z-50">
           <button
             onClick={onRunAnalysis}
             disabled={isAnalyzing}
