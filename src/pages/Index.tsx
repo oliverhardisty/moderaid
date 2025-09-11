@@ -565,8 +565,8 @@ const Index = () => {
                 </div>
               </Panel>
               
-              <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-gray-300 transition-colors cursor-col-resize flex items-center justify-center">
-                <div className="w-1 h-8 bg-gray-400 rounded-full"></div>
+              <PanelResizeHandle className="w-2 bg-border hover:bg-accent cursor-col-resize flex items-center justify-center group">
+                <div className="w-1 h-8 bg-muted-foreground group-hover:bg-foreground rounded-full transition-colors"></div>
               </PanelResizeHandle>
               
               {/* Right Section - Media Player Section */}
