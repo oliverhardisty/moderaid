@@ -26,6 +26,7 @@ const Index = () => {
   const [isCompactView, setIsCompactView] = useState(false);
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
   const [seekFunction, setSeekFunction] = useState<((timeInSeconds: number) => void) | null>(null);
+  const [savedPanelSizes, setSavedPanelSizes] = useState<{ left: number; right: number } | null>(null);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -493,16 +494,31 @@ const Index = () => {
   };
   const toggleCompactView = () => {
     const newCompactView = !isCompactView;
-    setIsCompactView(newCompactView);
-    if (newCompactView) {
-      // Compact view: maximize left panel (50%), minimize right panel (40%)
-      leftPanelRef.current?.resize(60);
-      rightPanelRef.current?.resize(40);
+    
+    // Get current panel sizes before changing them
+    const currentLeftSize = leftPanelRef.current?.getSize();
+    const currentRightSize = rightPanelRef.current?.getSize();
+    
+    if (!newCompactView) {
+      // Switching to normal view (left option): restore saved sizes or use current sizes
+      if (savedPanelSizes) {
+        leftPanelRef.current?.resize(savedPanelSizes.left);
+        rightPanelRef.current?.resize(savedPanelSizes.right);
+      } else {
+        // If no saved sizes, use current sizes
+        // This happens on first toggle - current sizes become the "normal" state
+      }
     } else {
-      // Normal view: restore default sizes
-      leftPanelRef.current?.resize(30);
-      rightPanelRef.current?.resize(70);
+      // Switching to compact view (right option): save current sizes and set minimum width
+      if (currentLeftSize !== undefined && currentRightSize !== undefined) {
+        setSavedPanelSizes({ left: currentLeftSize, right: currentRightSize });
+      }
+      // Set media player to minimum width (40%) and adjust left panel accordingly
+      rightPanelRef.current?.resize(40);
+      leftPanelRef.current?.resize(60);
     }
+    
+    setIsCompactView(newCompactView);
   };
   const handleAccept = async () => {
     setIsProcessing(true);
