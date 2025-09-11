@@ -564,7 +564,7 @@ const Index = () => {
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={(e) => handleFileChange(e)} />
 
 
-        <div className="flex-1 flex flex-col pt-20 pb-20 overflow-hidden py-[56px]">
+        <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden py-[56px]">
           {/* View Toggle */}
           <div className="px-4 pb-2 pt-2 flex justify-end items-center flex-shrink-0">
           <div className="inline-flex bg-gray-100 rounded-lg p-1">
