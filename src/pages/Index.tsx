@@ -138,6 +138,24 @@ const Index = () => {
             if (googleResult?.flagged) {
               googleResult.categories.forEach((category: string, index: number) => {
                 const score = googleResult.categoryScores?.[category] ?? 0;
+                
+                // Get timestamps for this specific category - improve matching logic
+                const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => {
+                  // Check if any of the timestamp categories match the current category
+                  return ts.categories.some((tsCategory: string) => 
+                    tsCategory === category || 
+                    tsCategory.toLowerCase() === category.toLowerCase() ||
+                    tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
+                  );
+                }) || [];
+                
+                console.log(`Processing Google category "${category}":`, {
+                  totalTimestamps: googleResult.timestamps?.length || 0,
+                  matchingTimestamps: categoryTimestamps.length,
+                  timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
+                  categoryTimestamps
+                });
+                
                 flags.push({
                   id: `google-${category}-${index}`,
                   type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -145,8 +163,16 @@ const Index = () => {
                   confidence: Math.round(score * 100),
                   timestamp: new Date().toLocaleString(),
                   model: 'Google Video Intelligence',
-                  description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence`,
-                  icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
+                  description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+                  icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
+                  timestamps: categoryTimestamps
+                });
+                
+                // Debug log for timestamps
+                console.log(`Created flag for ${category}:`, {
+                  category,
+                  timestampsCount: categoryTimestamps.length,
+                  timestamps: categoryTimestamps
                 });
               });
             }
