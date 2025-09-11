@@ -554,13 +554,13 @@ const Index = () => {
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
 
 
-        <div className="flex-1 flex overflow-hidden h-full">
+        <div className="flex-1 overflow-hidden h-full">
           {/* Content Area */}
           <div className="flex-1 flex overflow-hidden">
             <PanelGroup direction="horizontal" className="h-full min-h-0">
               {/* Left Section - Tab Section */}
               <Panel defaultSize={30} minSize={20} maxSize={60} className="min-h-0">
-                <div className="px-4 py-4 h-full flex flex-col">
+                <div className="px-4 py-4 h-full flex flex-col min-h-0">
                   <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
                 </div>
               </Panel>
@@ -571,7 +571,7 @@ const Index = () => {
               
               {/* Right Section - Media Player Section */}
               <Panel defaultSize={70} minSize={40} className="min-h-0">
-                <div className="px-4 py-4 h-full overflow-hidden">
+                <div className="px-4 py-4 h-full overflow-hidden flex flex-col min-h-0">
                   <div className="flex flex-col gap-4 h-full">
                     <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
                     
