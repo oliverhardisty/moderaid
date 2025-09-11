@@ -554,40 +554,38 @@ const Index = () => {
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
 
 
-        <div className="flex-1 overflow-hidden h-full">
+        <div className="flex-1 overflow-hidden h-full flex">
           {/* Content Area */}
-          <div className="flex-1 flex overflow-hidden">
-            <PanelGroup direction="horizontal" className="h-full min-h-0">
-              {/* Left Section - Tab Section */}
-              <Panel defaultSize={30} minSize={20} maxSize={60} className="min-h-0">
-                <div className="px-4 py-4 h-full flex flex-col min-h-0">
-                  <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
+          <PanelGroup direction="horizontal" className="h-full min-h-0 w-full">
+            {/* Left Section - Tab Section */}
+            <Panel defaultSize={30} minSize={20} maxSize={60} className="min-h-0">
+              <div className="h-full flex flex-col min-h-0">
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
+              </div>
+            </Panel>
+            
+            <PanelResizeHandle className="w-2 bg-border hover:bg-accent cursor-col-resize flex items-center justify-center group">
+              <div className="w-1 h-8 bg-muted-foreground group-hover:bg-foreground rounded-full transition-colors"></div>
+            </PanelResizeHandle>
+            
+            {/* Right Section - Media Player Section */}
+            <Panel defaultSize={70} minSize={40} className="min-h-0">
+              <div className="px-4 py-4 h-full overflow-hidden flex flex-col min-h-0">
+                <div className="flex flex-col gap-4 h-full">
+                  <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
+                  
+                  {/* Timestamp Markers */}
+                  {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
+                    // This would seek the video to the timestamp
+                    console.log('Seeking to:', time);
+                  }} videoDuration={60} // Would need to get actual duration from video player
+                  />}
+                  
+                  <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
                 </div>
-              </Panel>
-              
-              <PanelResizeHandle className="w-2 bg-border hover:bg-accent cursor-col-resize flex items-center justify-center group">
-                <div className="w-1 h-8 bg-muted-foreground group-hover:bg-foreground rounded-full transition-colors"></div>
-              </PanelResizeHandle>
-              
-              {/* Right Section - Media Player Section */}
-              <Panel defaultSize={70} minSize={40} className="min-h-0">
-                <div className="px-4 py-4 h-full overflow-hidden flex flex-col min-h-0">
-                  <div className="flex flex-col gap-4 h-full">
-                    <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
-                    
-                    {/* Timestamp Markers */}
-                    {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
-                      // This would seek the video to the timestamp
-                      console.log('Seeking to:', time);
-                    }} videoDuration={60} // Would need to get actual duration from video player
-                    />}
-                    
-                    <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
-                  </div>
-                </div>
-              </Panel>
-            </PanelGroup>
-          </div>
+              </div>
+            </Panel>
+          </PanelGroup>
         </div>
 
         {/* Action Bar */}

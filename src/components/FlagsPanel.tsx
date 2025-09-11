@@ -166,7 +166,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         </div>
       </TabsContent>
       
-      <TabsContent value="reports" className="mt-4 px-1">
+      <TabsContent value="reports" className="mt-4 px-4">
         <div className="p-3 bg-white border border-gray-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         </div>
       </TabsContent>
       
-      <TabsContent value="activity" className="mt-4 px-1">
+      <TabsContent value="activity" className="mt-4 px-4">
         <div className="space-y-3">
           <div className="p-3 bg-white border border-gray-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
