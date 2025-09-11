@@ -75,7 +75,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
       
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <TabsContent value="ai-flags" className="mt-4 space-y-4 px-1">
+          <TabsContent value="ai-flags" className="mt-4 space-y-4 px-2">
         <div className="space-y-3">
           {isAnalyzing ? (
             <div className="flex items-center justify-center py-8">
@@ -166,7 +166,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         </div>
       </TabsContent>
       
-      <TabsContent value="reports" className="mt-4 px-4">
+      <TabsContent value="reports" className="mt-4 px-2">
         <div className="p-3 bg-white border border-gray-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         </div>
       </TabsContent>
       
-      <TabsContent value="activity" className="mt-4 px-4">
+      <TabsContent value="activity" className="mt-4 px-2">
         <div className="space-y-3">
           <div className="p-3 bg-white border border-gray-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
@@ -214,7 +214,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
       </div>
       {/* Global action button - visible on all tabs */}
       {!isAnalyzing && onRunAnalysis && (
-        <div className="fixed bottom-[96px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 1.5rem)` }}>
+        <div className="fixed bottom-[96px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 0.5rem)` }}>
           <button
             onClick={onRunAnalysis}
             disabled={isAnalyzing}
