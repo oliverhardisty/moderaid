@@ -154,7 +154,7 @@ const ContentList = () => {
         />
 
         {/* Content Area */}
-        <div className="flex-1 pt-20 px-6 pb-6">
+        <div className="flex-1 pt-6 px-6 pb-6">
           {/* Top Controls */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
