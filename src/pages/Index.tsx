@@ -21,34 +21,7 @@ const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [moderationFlags, setModerationFlags] = useState<any[]>([{
-    id: 'violence-detected',
-    type: 'Violence Detection',
-    status: 'active' as const,
-    confidence: 87,
-    timestamp: new Date().toLocaleString(),
-    model: 'Initial Analysis',
-    description: 'Hockey fight content detected - requires manual review',
-    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-  }, {
-    id: 'sports-violence',
-    type: 'Sports Violence',
-    status: 'active' as const,
-    confidence: 92,
-    timestamp: new Date().toLocaleString(),
-    model: 'Content Classifier',
-    description: 'Physical altercation in sports context detected',
-    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-  }, {
-    id: 'aggressive-behavior',
-    type: 'Aggressive Behavior',
-    status: 'active' as const,
-    confidence: 79,
-    timestamp: new Date().toLocaleString(),
-    model: 'Behavioral Analysis',
-    description: 'Multiple instances of aggressive physical contact',
-    icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true'
-  }]);
+  const [moderationFlags, setModerationFlags] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
@@ -64,7 +37,8 @@ const Index = () => {
   } = useModeration();
   const {
     contentItems,
-    loading: itemsLoading
+    loading: itemsLoading,
+    updateModerationResult
   } = useContentItems();
 
   // Content data - use the same data as ContentList
@@ -239,6 +213,29 @@ const Index = () => {
       }
       setModerationFlags(flags);
       
+      // Save moderation results to localStorage for persistence
+      const activeFlags = flags.filter(f => f.status === 'active');
+      
+      if (activeFlags.length > 0) {
+        const moderationResult = {
+          flagged: true,
+          categories: activeFlags.map(f => f.type),
+          categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
+          provider: 'Multi-Provider Analysis',
+          timestamp: new Date().toISOString()
+        };
+        updateModerationResult(contentData.id, 'completed', moderationResult);
+      } else {
+        const moderationResult = {
+          flagged: false,
+          categories: [],
+          categoryScores: {},
+          provider: 'Multi-Provider Analysis',
+          timestamp: new Date().toISOString()
+        };
+        updateModerationResult(contentData.id, 'completed', moderationResult);
+      }
+      
       // Debug log the final flags array
       console.log('Final moderation flags with timestamps:', flags.map(f => ({
         type: f.type,
@@ -246,10 +243,9 @@ const Index = () => {
         hasTimestamps: !!f.timestamps
       })));
       
-      const activeFlags = flags.filter(f => f.status === 'active').length;
       toast({
         title: "Analysis Complete",
-        description: `Found ${activeFlags} flags for "${contentData.title}" using Google and Azure`
+        description: `Found ${activeFlags.length} flags for "${contentData.title}" using Google and Azure`
       });
     } catch (error: any) {
       console.error('Content analysis failed:', error);
@@ -370,8 +366,31 @@ const Index = () => {
         });
       }
       setModerationFlags(flags);
-      const activeFlags = flags.filter(f => f.status === 'active').length;
-      toast({ title: "Analysis Complete", description: `Found ${activeFlags} flags for "${contentData.title}"` });
+      
+      // Save moderation results to localStorage for persistence
+      const activeFlags = flags.filter(f => f.status === 'active');
+      
+      if (activeFlags.length > 0) {
+        const moderationResult = {
+          flagged: true,
+          categories: activeFlags.map(f => f.type),
+          categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
+          provider: 'Google Video Intelligence',
+          timestamp: new Date().toISOString()
+        };
+        updateModerationResult(contentData.id, 'completed', moderationResult);
+      } else {
+        const moderationResult = {
+          flagged: false,
+          categories: [],
+          categoryScores: {},
+          provider: 'Google Video Intelligence', 
+          timestamp: new Date().toISOString()
+        };
+        updateModerationResult(contentData.id, 'completed', moderationResult);
+      }
+      
+      toast({ title: "Analysis Complete", description: `Found ${activeFlags.length} flags for "${contentData.title}"` });
     } catch (err: any) {
       console.error('Local upload analyze failed:', err);
       toast({
@@ -422,13 +441,13 @@ const Index = () => {
             });
             
             flags.push({
-              id: `google-${category}-${index}`,
+              id: `${result.provider.toLowerCase().replace(/\s+/g, '-')}-${category}-${index}`,
               type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
               status: 'active' as const,
               confidence: Math.round(score * 100),
               timestamp: new Date(result.timestamp).toLocaleString(),
-              model: 'Google Video Intelligence',
-              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+              model: result.provider,
+              description: `${result.provider} detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
               icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
               timestamps: categoryTimestamps
             });
@@ -442,7 +461,7 @@ const Index = () => {
             status: 'dismissed' as const,
             confidence: 95,
             timestamp: new Date(result.timestamp).toLocaleString(),
-            model: 'Google Video Intelligence',
+            model: result.provider,
             description: 'No policy violations detected. Content passed all moderation checks.',
             icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
