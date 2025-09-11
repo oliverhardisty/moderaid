@@ -64,10 +64,10 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
 
   return (
     <Tabs defaultValue="ai-flags" className="h-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="ai-flags">AI flags</TabsTrigger>
-        <TabsTrigger value="reports">Reports</TabsTrigger>
-        <TabsTrigger value="activity">Activity</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+        <TabsTrigger value="ai-flags" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">AI flags</TabsTrigger>
+        <TabsTrigger value="reports" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">Reports</TabsTrigger>
+        <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md text-sm font-medium">Activity</TabsTrigger>
       </TabsList>
       
       <TabsContent value="ai-flags" className="mt-4 space-y-4">
@@ -165,7 +165,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 <button
                   onClick={onRunAnalysis}
                   disabled={isAnalyzing}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 border border-purple-600 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
