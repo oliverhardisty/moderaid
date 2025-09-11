@@ -25,6 +25,7 @@ const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
+  const [seekFunction, setSeekFunction] = useState<((timeInSeconds: number) => void) | null>(null);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -588,7 +589,7 @@ const Index = () => {
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
               <div className="h-full">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} />
+                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} />
               </div>
             </Panel>
             
@@ -599,7 +600,7 @@ const Index = () => {
             {/* Right Panel - Video Player and Metadata */}
             <Panel ref={rightPanelRef} defaultSize={70} minSize={40}>
               <div className="flex flex-col gap-4 h-full pl-4">
-                <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} />
+                <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={(seekFn) => setSeekFunction(() => seekFn)} />
                 
                 {/* Timestamp Markers */}
                 {currentModerationResult?.timestamps && (

@@ -20,6 +20,7 @@ interface FlagsPanelProps {
   moderationHistory: number;
   isAnalyzing?: boolean;
   onRunAnalysis?: () => void;
+  onSeekToTimestamp?: ((timeInSeconds: number) => void) | null;
 }
 
 export const FlagsPanel: React.FC<FlagsPanelProps> = ({ 
@@ -28,7 +29,8 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   uploaderStatus, 
   moderationHistory,
   isAnalyzing = false,
-  onRunAnalysis
+  onRunAnalysis,
+  onSeekToTimestamp
 }) => {
   console.log('FlagsPanel received flags:', flags.map(f => ({
     type: f.type,
@@ -176,7 +178,11 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                                 className="font-mono font-medium text-black underline hover:text-gray-700 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  console.log('Seek to timestamp:', timestamp.timeOffset, 'seconds');
+                                  if (onSeekToTimestamp) {
+                                    onSeekToTimestamp(timestamp.timeOffset);
+                                  } else {
+                                    console.log('Seek function not available, timestamp:', timestamp.timeOffset, 'seconds');
+                                  }
                                 }}
                               >
                                 {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}

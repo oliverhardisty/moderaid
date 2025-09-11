@@ -14,13 +14,15 @@ interface VideoPlayerProps {
   onUnblur: () => void;
   onReportIssue: () => void;
   videoUrl?: string;
+  onPlayerReady?: (seekFunction: (timeInSeconds: number) => void) => void;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
   isBlurred, 
   onUnblur, 
   onReportIssue,
-  videoUrl 
+  videoUrl,
+  onPlayerReady 
 }) => {
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -104,6 +106,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
+  const seekTo = (timeInSeconds: number) => {
+    console.log('Seeking to:', timeInSeconds);
+    if (isDirectMedia && videoRef.current) {
+      videoRef.current.currentTime = timeInSeconds;
+    } else if (playerRef.current && isPlayerReady) {
+      playerRef.current.seekTo(timeInSeconds);
+    }
+  };
+
   const loadYouTubeAPI = () => {
     return new Promise((resolve) => {
       if (window.YT && window.YT.Player) {
@@ -144,6 +155,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             setIsPlayerReady(true);
             setDuration(event.target.getDuration());
             setVolume(event.target.getVolume());
+            onPlayerReady?.(seekTo);
           },
           onStateChange: (event: any) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
@@ -201,6 +213,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 setDuration(videoRef.current.duration);
                 setVolume(videoRef.current.volume * 100);
                 setIsPlayerReady(true);
+                onPlayerReady?.(seekTo);
               }
             }}
             onTimeUpdate={() => {
