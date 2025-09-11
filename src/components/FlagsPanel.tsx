@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Flag {
   id: string;
@@ -65,14 +66,15 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   };
 
   return (
-    <Tabs defaultValue="ai-flags" className="h-full">
-      <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto border-b border-gray-200">
+    <Tabs defaultValue="ai-flags" className="h-full flex flex-col">
+      <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto border-b border-gray-200 flex-shrink-0">
         <TabsTrigger value="ai-flags" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">AI flags</TabsTrigger>
         <TabsTrigger value="reports" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Reports</TabsTrigger>
         <TabsTrigger value="activity" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Activity</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="ai-flags" className="mt-4 space-y-4">
+      <ScrollArea className="flex-1">
+        <TabsContent value="ai-flags" className="mt-4 space-y-4">
         <div className="space-y-3">
           {isAnalyzing ? (
             <div className="flex items-center justify-center py-8">
@@ -207,6 +209,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
           </div>
         </div>
       </TabsContent>
+      </ScrollArea>
       {/* Global action button - visible on all tabs */}
       {!isAnalyzing && onRunAnalysis && (
         <div className="fixed bottom-[96px] z-50" style={{ left: `calc(${sidebarExpanded ? '16rem' : '3.5rem'} + 1.5rem)` }}>
