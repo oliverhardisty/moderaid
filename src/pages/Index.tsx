@@ -43,7 +43,9 @@ const Index = () => {
   } = useContentItems();
 
   // Content data - use the same data as ContentList
-  const currentContent = contentItems.find(item => item.id === `#${contentId}`) || contentItems[0];
+  const currentContent = contentItems.find(item => 
+    contentId ? (item.id === contentId || item.id.endsWith(contentId) || item.id === `#${contentId}`) : false
+  ) || contentItems[0];
   const contentData = currentContent ? {
     id: currentContent.id,
     priority: currentContent.priority,
