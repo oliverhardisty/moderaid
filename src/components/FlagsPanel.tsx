@@ -166,25 +166,22 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     {/* Show timestamps if available */}
                     {flag.timestamps && flag.timestamps.length > 0 && (
                       <div className="mt-2 pt-2 border-t border-gray-200">
-                        <div className="text-xs font-medium text-blue-600 mb-1">
+                        <div className="text-xs font-medium text-black mb-1">
                           Violation timestamps ({flag.timestamps.length}):
                         </div>
                         <div className="text-xs text-gray-700">
                           {flag.timestamps.map((timestamp: any, idx: number) => (
                             <span key={idx} className="inline-flex items-center gap-1 mr-3 mb-1">
-                              <span className="font-mono font-medium">
-                                {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
-                              </span>
-                              <span className="text-gray-500">({Math.round(timestamp.confidence * 100)}%)</span>
                               <button 
-                                className="text-blue-600 hover:text-blue-800 underline"
+                                className="font-mono font-medium text-black underline hover:text-gray-700 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   console.log('Seek to timestamp:', timestamp.timeOffset, 'seconds');
                                 }}
                               >
-                                jump
+                                {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
                               </button>
+                              <span className="text-gray-500">({Math.round(timestamp.confidence * 100)}%)</span>
                             </span>
                           ))}
                         </div>
