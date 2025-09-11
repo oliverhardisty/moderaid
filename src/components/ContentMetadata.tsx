@@ -19,7 +19,7 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
 
   return (
     <section>
-      <div className="grid grid-cols-4 gap-4 w-full">
+      <div className="grid grid-cols-5 gap-4 w-full">
         {/* Content Title */}
         <div className="col-span-2 w-full min-w-0">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
