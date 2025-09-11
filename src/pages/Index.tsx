@@ -94,7 +94,6 @@ const Index = () => {
           fileInputRef.current?.click();
           return;
         }
-
         const isYouTube = urlLower.includes('youtube.com') || urlLower.includes('youtu.be');
         if (isYouTube) {
           flags.push({
@@ -113,24 +112,18 @@ const Index = () => {
             if (googleResult?.flagged) {
               googleResult.categories.forEach((category: string, index: number) => {
                 const score = googleResult.categoryScores?.[category] ?? 0;
-                
+
                 // Get timestamps for this specific category - improve matching logic
                 const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => {
                   // Check if any of the timestamp categories match the current category
-                  return ts.categories.some((tsCategory: string) => 
-                    tsCategory === category || 
-                    tsCategory.toLowerCase() === category.toLowerCase() ||
-                    tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
-                  );
+                  return ts.categories.some((tsCategory: string) => tsCategory === category || tsCategory.toLowerCase() === category.toLowerCase() || tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase());
                 }) || [];
-                
                 console.log(`Processing Google category "${category}":`, {
                   totalTimestamps: googleResult.timestamps?.length || 0,
                   matchingTimestamps: categoryTimestamps.length,
                   timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
                   categoryTimestamps
                 });
-                
                 flags.push({
                   id: `google-${category}-${index}`,
                   type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -142,7 +135,7 @@ const Index = () => {
                   icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
                   timestamps: categoryTimestamps
                 });
-                
+
                 // Debug log for timestamps
                 console.log(`Created flag for ${category}:`, {
                   category,
@@ -213,14 +206,15 @@ const Index = () => {
         });
       }
       setModerationFlags(flags);
-      
+
       // Save moderation results to localStorage for persistence
       const activeFlags = flags.filter(f => f.status === 'active');
       // Collect all timestamps from active flags (if any)
-      const allTimestamps = activeFlags
-        .filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0)
-        .flatMap(f => f.timestamps as Array<{ timeOffset: number; categories: string[]; confidence: number }>);
-      
+      const allTimestamps = activeFlags.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
+        timeOffset: number;
+        categories: string[];
+        confidence: number;
+      }>);
       if (activeFlags.length > 0) {
         const moderationResult = {
           flagged: true,
@@ -243,14 +237,13 @@ const Index = () => {
         } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       }
-      
+
       // Debug log the final flags array
       console.log('Final moderation flags with timestamps:', flags.map(f => ({
         type: f.type,
         timestampsCount: f.timestamps?.length || 0,
         hasTimestamps: !!f.timestamps
       })));
-      
       toast({
         title: "Analysis Complete",
         description: `Found ${activeFlags.length} flags for "${contentData.title}" using Google and Azure`
@@ -297,70 +290,74 @@ const Index = () => {
     // clear input
     e.target.value = '';
   };
-
   const uploadAndAnalyzeLocalFile = async (file: File) => {
     try {
       setIsAnalyzing(true);
-      toast({ title: "Uploading video", description: "Preparing a copy for analysis..." });
+      toast({
+        title: "Uploading video",
+        description: "Preparing a copy for analysis..."
+      });
       const ext = file.name.split('.').pop() || 'mp4';
       const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('videos').upload(path, file, {
+      const {
+        error: uploadError
+      } = await supabase.storage.from('videos').upload(path, file, {
         cacheControl: '3600',
         upsert: false,
         contentType: file.type || 'video/mp4'
       });
       if (uploadError) {
         console.error('Upload failed:', uploadError);
-        toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+        toast({
+          title: "Upload failed",
+          description: uploadError.message,
+          variant: "destructive"
+        });
         setIsAnalyzing(false);
         return;
       }
-      const { data: pub } = supabase.storage.from('videos').getPublicUrl(path);
+      const {
+        data: pub
+      } = supabase.storage.from('videos').getPublicUrl(path);
       const publicUrl = pub.publicUrl;
       // Run Google analysis on uploaded URL
       const googleResult = await moderateWithGoogleVideo(publicUrl);
       const flags: any[] = [];
-        if (googleResult?.flagged) {
-          googleResult.categories.forEach((category: string, index: number) => {
-            const score = googleResult.categoryScores?.[category] ?? 0;
-            
-            // Get timestamps for this specific category - improve matching logic
-            const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => {
-              // Check if any of the timestamp categories match the current category
-              return ts.categories.some((tsCategory: string) => 
-                tsCategory === category || 
-                tsCategory.toLowerCase() === category.toLowerCase() ||
-                tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
-              );
-            }) || [];
-            
-            console.log(`Processing Google category "${category}":`, {
-              totalTimestamps: googleResult.timestamps?.length || 0,
-              matchingTimestamps: categoryTimestamps.length,
-              timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
-              categoryTimestamps
-            });
-            
-            flags.push({
-              id: `google-${category}-${index}`,
-              type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-              status: 'active' as const,
-              confidence: Math.round(score * 100),
-              timestamp: new Date().toLocaleString(),
-              model: 'Google Video Intelligence',
-              description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
-              icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
-              timestamps: categoryTimestamps
-            });
-            
-            // Debug log for timestamps
-            console.log(`Created flag for ${category}:`, {
-              category,
-              timestampsCount: categoryTimestamps.length,
-              timestamps: categoryTimestamps
-            });
+      if (googleResult?.flagged) {
+        googleResult.categories.forEach((category: string, index: number) => {
+          const score = googleResult.categoryScores?.[category] ?? 0;
+
+          // Get timestamps for this specific category - improve matching logic
+          const categoryTimestamps = googleResult.timestamps?.filter((ts: any) => {
+            // Check if any of the timestamp categories match the current category
+            return ts.categories.some((tsCategory: string) => tsCategory === category || tsCategory.toLowerCase() === category.toLowerCase() || tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase());
+          }) || [];
+          console.log(`Processing Google category "${category}":`, {
+            totalTimestamps: googleResult.timestamps?.length || 0,
+            matchingTimestamps: categoryTimestamps.length,
+            timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
+            categoryTimestamps
           });
-        }
+          flags.push({
+            id: `google-${category}-${index}`,
+            type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+            status: 'active' as const,
+            confidence: Math.round(score * 100),
+            timestamp: new Date().toLocaleString(),
+            model: 'Google Video Intelligence',
+            description: `Google detected ${category} content with ${Math.round(score * 100)}% confidence${categoryTimestamps.length > 0 ? ` at ${categoryTimestamps.length} timestamp(s)` : ''}`,
+            icon: 'https://api.builder.io/api/v1/image/assets/TEMP/621c8c5642880383388d15c77d0d83b3374d09eb?placeholderIfAbsent=true',
+            timestamps: categoryTimestamps
+          });
+
+          // Debug log for timestamps
+          console.log(`Created flag for ${category}:`, {
+            category,
+            timestampsCount: categoryTimestamps.length,
+            timestamps: categoryTimestamps
+          });
+        });
+      }
       if (flags.length === 0) {
         flags.push({
           id: 'content-approved',
@@ -374,14 +371,15 @@ const Index = () => {
         });
       }
       setModerationFlags(flags);
-      
+
       // Save moderation results to localStorage for persistence
       const activeFlags = flags.filter(f => f.status === 'active');
       // Collect all timestamps from active flags (if any)
-      const allTimestamps = activeFlags
-        .filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0)
-        .flatMap(f => f.timestamps as Array<{ timeOffset: number; categories: string[]; confidence: number }>);
-      
+      const allTimestamps = activeFlags.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
+        timeOffset: number;
+        categories: string[];
+        confidence: number;
+      }>);
       if (activeFlags.length > 0) {
         const moderationResult = {
           flagged: true,
@@ -397,14 +395,16 @@ const Index = () => {
           flagged: false,
           categories: [],
           categoryScores: {},
-          provider: 'Google Video Intelligence', 
+          provider: 'Google Video Intelligence',
           timestamp: new Date().toISOString(),
           timestamps: []
         } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       }
-      
-      toast({ title: "Analysis Complete", description: `Found ${activeFlags.length} flags for "${contentData.title}"` });
+      toast({
+        title: "Analysis Complete",
+        description: `Found ${activeFlags.length} flags for "${contentData.title}"`
+      });
     } catch (err: any) {
       console.error('Local upload analyze failed:', err);
       toast({
@@ -426,34 +426,26 @@ const Index = () => {
       moderationStatus: currentContent?.moderation_status,
       videoUrl: contentData.videoUrl
     });
-
     if (!itemsLoading && currentContent) {
-        // Check if we have stored results for this content
-        if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
-          console.log('Using stored moderation results for:', currentContent.id);
-          const result = currentContent.moderation_result;
-          setCurrentModerationResult(result);
+      // Check if we have stored results for this content
+      if (currentContent.moderation_result && currentContent.moderation_status === 'completed') {
+        console.log('Using stored moderation results for:', currentContent.id);
+        const result = currentContent.moderation_result;
+        setCurrentModerationResult(result);
         const flags: any[] = [];
-        
         if (result.flagged) {
           result.categories.forEach((category: string, index: number) => {
             const score = result.categoryScores?.[category] ?? 0;
-            
+
             // Get timestamps for this specific category from the stored result - improve matching
             const categoryTimestamps = (result as any).timestamps?.filter((ts: any) => {
-              return ts.categories.some((tsCategory: string) => 
-                tsCategory === category || 
-                tsCategory.toLowerCase() === category.toLowerCase() ||
-                tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase()
-              );
+              return ts.categories.some((tsCategory: string) => tsCategory === category || tsCategory.toLowerCase() === category.toLowerCase() || tsCategory.replace(/[/_]/g, ' ').toLowerCase() === category.replace(/[/_]/g, ' ').toLowerCase());
             }) || [];
-            
             console.log(`Processing stored category "${category}":`, {
               totalTimestamps: (result as any).timestamps?.length || 0,
               matchingTimestamps: categoryTimestamps.length,
               timestampCategories: (result as any).timestamps?.map((ts: any) => ts.categories) || []
             });
-            
             flags.push({
               id: `${result.provider.toLowerCase().replace(/\s+/g, '-')}-${category}-${index}`,
               type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -467,7 +459,6 @@ const Index = () => {
             });
           });
         }
-        
         if (flags.length === 0) {
           flags.push({
             id: 'content-approved',
@@ -480,7 +471,6 @@ const Index = () => {
             icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
         }
-        
         setModerationFlags(flags);
         setCurrentModerationResult(result);
         setIsAnalyzing(false);
@@ -560,19 +550,13 @@ const Index = () => {
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
         {/* Header */}
-        <Header 
-          contentId={contentData.id} 
-          priority={contentData.priority} 
-          sidebarExpanded={sidebarExpanded}
-          isCompactView={isCompactView}
-          onToggleCompactView={toggleCompactView}
-        />
-        <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={(e) => handleFileChange(e)} />
+        <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} isCompactView={isCompactView} onToggleCompactView={toggleCompactView} />
+        <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
 
 
         <div className="flex-1 flex flex-col pt-16 pb-20 overflow-hidden">
           {/* Content Area */}
-          <div className="flex-1 px-4 pb-4 overflow-auto">
+          <div className="flex-1 px-4 pb-4 overflow-auto py-[16px]">
             <PanelGroup direction="horizontal" className="h-full min-h-0">
             {/* Left Panel - Flags and Reports */}
             <Panel ref={leftPanelRef} defaultSize={30} minSize={20} maxSize={60}>
@@ -588,19 +572,14 @@ const Index = () => {
             {/* Right Panel - Video Player and Metadata */}
             <Panel ref={rightPanelRef} defaultSize={70} minSize={40}>
               <div className="flex flex-col gap-4 h-full pl-4">
-                <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={(seekFn) => setSeekFunction(() => seekFn)} />
+                <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
                 
                 {/* Timestamp Markers */}
-                {currentModerationResult?.timestamps && (
-                  <TimestampMarkers 
-                    timestamps={currentModerationResult.timestamps}
-                    onSeekTo={(time) => {
-                      // This would seek the video to the timestamp
-                      console.log('Seeking to:', time);
-                    }}
-                    videoDuration={60} // Would need to get actual duration from video player
-                  />
-                )}
+                {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
+                  // This would seek the video to the timestamp
+                  console.log('Seeking to:', time);
+                }} videoDuration={60} // Would need to get actual duration from video player
+                />}
                 
                 <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
               </div>
