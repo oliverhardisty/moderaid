@@ -272,28 +272,65 @@ Deno.serve(async (req) => {
     const operationName = annotateJson.name as string;
     log('Operation started', operationName);
 
-    // Poll operation until done
+    // Poll operation until done with extended timeout for larger videos
     let responseJson: any | null = null;
-    const maxAttempts = 60; // ~60 seconds max with 1s interval
+    const maxAttempts = 180; // 3 minutes max with 1s interval for better handling of large videos
+    let pollInterval = 1000; // Start with 1 second
+    
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const opRes = await fetch(
-        `https://videointelligence.googleapis.com/v1/${operationName}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      const opJson = await opRes.json();
-
-      if (opJson.done) {
-        if (opJson.error) {
-          log('Operation completed with error', opJson.error);
-          return new Response(
-            JSON.stringify({ error: 'Google operation error', details: opJson.error }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+      try {
+        const opRes = await fetch(
+          `https://videointelligence.googleapis.com/v1/${operationName}`,
+          { 
+            headers: { Authorization: `Bearer ${accessToken}` },
+            // Add timeout to prevent hanging requests
+            signal: AbortSignal.timeout(30000) // 30 second timeout per request
+          }
+        );
+        
+        if (!opRes.ok) {
+          log(`Operation check failed with status ${opRes.status}: ${opRes.statusText}`);
+          // Continue polling on non-fatal errors
+          if (opRes.status >= 500) {
+            await sleep(pollInterval);
+            continue;
+          }
         }
-        responseJson = opJson.response;
-        break;
+        
+        const opJson = await opRes.json();
+        log(`Polling attempt ${attempt + 1}/${maxAttempts}, operation status: ${opJson.done ? 'completed' : 'in progress'}`);
+
+        if (opJson.done) {
+          if (opJson.error) {
+            log('Operation completed with error', opJson.error);
+            return new Response(
+              JSON.stringify({ error: 'Google operation error', details: opJson.error }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          responseJson = opJson.response;
+          log('Operation completed successfully');
+          break;
+        }
+        
+        // Adaptive polling: increase interval slightly as time goes on to reduce API calls
+        if (attempt > 30) pollInterval = 2000; // 2 seconds after 30 attempts
+        if (attempt > 60) pollInterval = 3000; // 3 seconds after 60 attempts
+        
+        await sleep(pollInterval);
+      } catch (e) {
+        log(`Error during polling attempt ${attempt + 1}: ${String(e)}`);
+        // If it's a timeout or network error, continue polling
+        if (attempt < maxAttempts - 1) {
+          await sleep(pollInterval);
+          continue;
+        }
+        // If it's the last attempt, return error
+        return new Response(
+          JSON.stringify({ error: 'Failed to poll operation status', details: String(e) }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-      await sleep(1000);
     }
 
     if (!responseJson) {
