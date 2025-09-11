@@ -241,7 +241,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               </p>
               <button
                 onClick={onUnblur}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                className="px-6 py-3 bg-white border-2 border-purple-600 hover:bg-purple-50 text-purple-600 font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
               >
                 <Eye className="w-4 h-4" />
                 Unblur Content
