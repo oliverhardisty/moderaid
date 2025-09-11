@@ -19,19 +19,19 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
 
   return (
     <section>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4 w-full">
         {/* Content Title */}
-        <div className="col-span-2">
+        <div className="col-span-2 w-full min-w-0">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Content title
           </label>
-          <h2 className="text-sm text-gray-900 mt-1">
+          <h2 className="text-sm text-gray-900 mt-1 truncate">
             {title}
           </h2>
         </div>
 
         {/* Upload Date */}
-        <div>
+        <div className="w-full min-w-0">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Upload date
           </label>
@@ -43,7 +43,7 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
         </div>
 
         {/* Views */}
-        <div>
+        <div className="w-full min-w-0">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Views
           </label>
@@ -55,7 +55,7 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
         </div>
 
         {/* Viewer Reports */}
-        <div>
+        <div className="w-full min-w-0">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Viewer reports
           </label>
