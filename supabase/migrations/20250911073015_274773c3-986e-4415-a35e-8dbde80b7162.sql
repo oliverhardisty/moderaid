@@ -1,0 +1,1 @@
+DELETE FROM content_items WHERE id = '35da6ee7-eca1-4538-9eb2-d7e13a12fbd3'
