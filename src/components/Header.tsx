@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, 
         {showBackButton && onToggleCompactView && (
           <div className="inline-flex bg-gray-100 rounded-lg p-1 ml-3">
             <button 
-              onClick={() => !isCompactView && onToggleCompactView()} 
+              onClick={() => isCompactView && onToggleCompactView()} 
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${!isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({ contentId, priority, itemCount, 
               </svg>
             </button>
             <button 
-              onClick={() => isCompactView && onToggleCompactView()} 
+              onClick={() => !isCompactView && onToggleCompactView()} 
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
