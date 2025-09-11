@@ -548,11 +548,10 @@ const Index = () => {
       <Sidebar isExpanded={sidebarExpanded} onToggle={handleSidebarToggle} />
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col overflow-hidden pt-16 pb-20 transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
+      <main className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-14'}`}>
         {/* Header */}
         <Header contentId={contentData.id} priority={contentData.priority} sidebarExpanded={sidebarExpanded} isCompactView={isCompactView} onToggleCompactView={toggleCompactView} />
         <input ref={fileInputRef} type="file" accept="video/*" className="hidden" aria-hidden="true" onChange={e => handleFileChange(e)} />
-
 
         <div className="flex-1 overflow-hidden h-full flex">
           {/* Content Area */}
