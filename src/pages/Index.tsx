@@ -572,6 +572,32 @@ const Index = () => {
             <Panel defaultSize={70} minSize={40} className="h-full">
               <div className="px-4 py-4 h-full overflow-hidden flex flex-col">
                 <div className="flex-1 flex flex-col gap-4 min-h-0 h-full">
+                  {/* View Toggle - moved from header */}
+                  <div className="flex justify-end">
+                    <div className="inline-flex bg-gray-100 rounded-lg p-1">
+                      <button 
+                        onClick={() => !isCompactView && toggleCompactView()} 
+                        className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        title="Minimize media player"
+                      >
+                        <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="1.27246" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
+                          <rect x="10.7349" y="2.96021" width="7.48682" height="5.70145" rx="1" fill="currentColor" />
+                        </svg>
+                      </button>
+                      <button 
+                        onClick={() => isCompactView && toggleCompactView()} 
+                        className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${!isCompactView ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        title="Maximize media player"
+                      >
+                        <svg width="21" height="16" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="0.749512" y="0.991272" width="18.9246" height="13.9557" rx="1.5" stroke="currentColor" strokeLinecap="round" />
+                          <rect x="6.23047" y="3.08093" width="11.5454" height="8.08487" rx="1" fill="currentColor" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div className="flex-1 min-h-0">
                     <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
                   </div>
