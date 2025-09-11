@@ -162,19 +162,6 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                     <div className={`font-medium ${getConfidenceColor(flag.confidence)}`}>
                       {flag.confidence}% confidence
                     </div>
-                    <div className="text-gray-500">
-                      Model: {flag.model}
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded text-gray-700 mt-2">
-                      {flag.description}
-                      {/* Debug indicator */}
-                      <div className="text-xs text-blue-600 mt-1 font-mono">
-                        DEBUG: Timestamps: {flag.timestamps ? `${flag.timestamps.length} found` : 'none'}
-                        {flag.timestamps && flag.timestamps.length > 0 && (
-                          <span className="ml-2 text-green-600">✓ Should show timestamps below</span>
-                        )}
-                      </div>
-                    </div>
                     
                     {/* Show timestamps if available */}
                     {flag.timestamps && flag.timestamps.length > 0 && (
