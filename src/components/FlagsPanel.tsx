@@ -214,7 +214,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
         
         {/* Global action button - moved inside scroll area */}
         {!isAnalyzing && onRunAnalysis && (
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-white">
+          <div className="absolute bottom-0 left-0 right-0 p-3">
             <button
               onClick={onRunAnalysis}
               disabled={isAnalyzing}
