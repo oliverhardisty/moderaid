@@ -557,26 +557,36 @@ const Index = () => {
         <div className="flex-1 flex flex-col pt-16 pb-20 h-screen overflow-hidden">
           {/* Content Area */}
           <div className="flex-1 flex overflow-hidden">
-            {/* Left Section - Tab Section */}
-            <div className="w-1/3 min-w-80 px-4 py-4 h-full">
-              <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
-            </div>
-            
-            {/* Right Section - Media Player Section */}
-            <div className="flex-1 px-4 py-4 h-full">
-              <div className="flex flex-col gap-4 h-full">
-                <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
-                
-                {/* Timestamp Markers */}
-                {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
-                  // This would seek the video to the timestamp
-                  console.log('Seeking to:', time);
-                }} videoDuration={60} // Would need to get actual duration from video player
-                />}
-                
-                <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
-              </div>
-            </div>
+            <PanelGroup direction="horizontal" className="h-full min-h-0">
+              {/* Left Section - Tab Section */}
+              <Panel defaultSize={30} minSize={20} maxSize={60}>
+                <div className="px-4 py-4 h-full">
+                  <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
+                </div>
+              </Panel>
+              
+              <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-gray-300 transition-colors cursor-col-resize flex items-center justify-center">
+                <div className="w-1 h-8 bg-gray-400 rounded-full"></div>
+              </PanelResizeHandle>
+              
+              {/* Right Section - Media Player Section */}
+              <Panel defaultSize={70} minSize={40}>
+                <div className="px-4 py-4 h-full">
+                  <div className="flex flex-col gap-4 h-full">
+                    <VideoPlayer isBlurred={isContentBlurred} onUnblur={handleUnblur} onReportIssue={handleReportIssue} videoUrl={contentData.videoUrl} onPlayerReady={seekFn => setSeekFunction(() => seekFn)} />
+                    
+                    {/* Timestamp Markers */}
+                    {currentModerationResult?.timestamps && <TimestampMarkers timestamps={currentModerationResult.timestamps} onSeekTo={time => {
+                      // This would seek the video to the timestamp
+                      console.log('Seeking to:', time);
+                    }} videoDuration={60} // Would need to get actual duration from video player
+                    />}
+                    
+                    <ContentMetadata title={contentData.title} uploadDate={contentData.uploadDate} views={contentData.views} viewerReports={contentData.viewerReports} />
+                  </div>
+                </div>
+              </Panel>
+            </PanelGroup>
           </div>
         </div>
 
