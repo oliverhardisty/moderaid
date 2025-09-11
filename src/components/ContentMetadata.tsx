@@ -18,10 +18,10 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
   };
 
   return (
-    <section className="bg-gray-100 p-4 rounded-lg border border-gray-200">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <section>
+      <div className="grid grid-cols-4 gap-4">
         {/* Content Title */}
-        <div className="md:col-span-2">
+        <div>
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Content title
           </label>
