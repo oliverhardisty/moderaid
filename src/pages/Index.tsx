@@ -215,6 +215,10 @@ const Index = () => {
       
       // Save moderation results to localStorage for persistence
       const activeFlags = flags.filter(f => f.status === 'active');
+      // Collect all timestamps from active flags (if any)
+      const allTimestamps = activeFlags
+        .filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0)
+        .flatMap(f => f.timestamps as Array<{ timeOffset: number; categories: string[]; confidence: number }>);
       
       if (activeFlags.length > 0) {
         const moderationResult = {
@@ -222,8 +226,10 @@ const Index = () => {
           categories: activeFlags.map(f => f.type),
           categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
           provider: 'Multi-Provider Analysis',
-          timestamp: new Date().toISOString()
-        };
+          timestamp: new Date().toISOString(),
+          // Persist timestamps so they survive refresh
+          timestamps: allTimestamps
+        } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       } else {
         const moderationResult = {
@@ -231,8 +237,9 @@ const Index = () => {
           categories: [],
           categoryScores: {},
           provider: 'Multi-Provider Analysis',
-          timestamp: new Date().toISOString()
-        };
+          timestamp: new Date().toISOString(),
+          timestamps: []
+        } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       }
       
@@ -369,6 +376,10 @@ const Index = () => {
       
       // Save moderation results to localStorage for persistence
       const activeFlags = flags.filter(f => f.status === 'active');
+      // Collect all timestamps from active flags (if any)
+      const allTimestamps = activeFlags
+        .filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0)
+        .flatMap(f => f.timestamps as Array<{ timeOffset: number; categories: string[]; confidence: number }>);
       
       if (activeFlags.length > 0) {
         const moderationResult = {
@@ -376,8 +387,9 @@ const Index = () => {
           categories: activeFlags.map(f => f.type),
           categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
           provider: 'Google Video Intelligence',
-          timestamp: new Date().toISOString()
-        };
+          timestamp: new Date().toISOString(),
+          timestamps: allTimestamps
+        } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       } else {
         const moderationResult = {
@@ -385,8 +397,9 @@ const Index = () => {
           categories: [],
           categoryScores: {},
           provider: 'Google Video Intelligence', 
-          timestamp: new Date().toISOString()
-        };
+          timestamp: new Date().toISOString(),
+          timestamps: []
+        } as any;
         updateModerationResult(contentData.id, 'completed', moderationResult);
       }
       
