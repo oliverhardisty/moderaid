@@ -59,34 +59,7 @@ export const useContentItems = () => {
   };
 
   // Mock data for demo purposes
-  const mockContentItems: ContentItem[] = [
-    {
-      id: '#67890',
-      title: 'Sexual Content Test Video',
-      upload_date: 'Mar 12, 2024',
-      views: 15781,
-      user_reports: 12,
-      priority: 'high',
-      status: 'approved',
-      video_url: 'http://localhost:8000/Documents/Career/Designs/1.%20Product%20design/Company%20work/Moderaid/Content/sexual.mp4',
-      created_at: '2024-03-12T00:00:00Z',
-      updated_at: '2024-03-12T00:00:00Z',
-      moderation_status: 'pending'
-    },
-    {
-      id: '#54321',
-      title: 'Safe Content Example',
-      upload_date: 'Mar 8, 2024',
-      views: 3421,
-      user_reports: 0,
-      priority: 'low',
-      status: 'approved',
-      video_url: 'https://example.com/safe-video.mp4',
-      created_at: '2024-03-08T00:00:00Z',
-      updated_at: '2024-03-08T00:00:00Z',
-      moderation_status: 'pending'
-    }
-  ];
+  const mockContentItems: ContentItem[] = [];
 
   const fetchContentItems = async () => {
     try {
