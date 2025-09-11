@@ -385,6 +385,12 @@ Deno.serve(async (req) => {
       { match: 'weapon', category: 'weapons' },
       { match: 'blood', category: 'graphic_content' },
       { match: 'fight', category: 'violence' },
+      { match: 'combat', category: 'violence' },
+      { match: 'attack', category: 'violence' },
+      { match: 'hitting', category: 'violence' },
+      { match: 'punch', category: 'violence' },
+      { match: 'kick', category: 'violence' },
+      { match: 'aggressive', category: 'violence' },
     ];
 
     for (const label of allLabelGroups) {
@@ -396,7 +402,7 @@ Deno.serve(async (req) => {
         if (name.includes(sig.match)) {
           const prev = categoryScores[sig.category] ?? 0;
           categoryScores[sig.category] = Number(Math.max(prev, maxConf).toFixed(3));
-          if (maxConf >= 0.7 && !categories.includes(sig.category)) {
+          if (maxConf >= 0.5 && !categories.includes(sig.category)) {
             categories.push(sig.category);
             flagged = true;
           }
