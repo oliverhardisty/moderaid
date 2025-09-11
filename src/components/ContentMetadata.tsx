@@ -21,7 +21,7 @@ export const ContentMetadata: React.FC<ContentMetadataProps> = ({
     <section>
       <div className="grid grid-cols-4 gap-4">
         {/* Content Title */}
-        <div>
+        <div className="col-span-2">
           <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             Content title
           </label>
