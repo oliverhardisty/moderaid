@@ -560,7 +560,7 @@ const Index = () => {
             <PanelGroup direction="horizontal" className="h-full min-h-0">
               {/* Left Section - Tab Section */}
               <Panel defaultSize={30} minSize={20} maxSize={60}>
-                <div className="px-4 py-4 h-full">
+                <div className="px-4 py-4 h-full overflow-y-auto">
                   <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
                 </div>
               </Panel>
