@@ -19,7 +19,7 @@ const SocialMediaModeration = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [moderationIssues, setModerationIssues] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [isCompactView, setIsCompactView] = useState(false);
+  
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
@@ -158,9 +158,6 @@ const SocialMediaModeration = () => {
     setIsContentBlurred(!isContentBlurred);
   };
 
-  const toggleCompactView = () => {
-    setIsCompactView(!isCompactView);
-  };
 
   const handleAccept = () => {
     toast({
@@ -201,31 +198,6 @@ const SocialMediaModeration = () => {
         />
 
         <div className="flex-1 pt-6 px-6 pb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch 
-                  id="blur-content" 
-                  checked={!isContentBlurred}
-                  onCheckedChange={handleUnblur}
-                />
-                <label htmlFor="blur-content" className="text-sm font-medium">
-                  Unblur content
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Layout className="w-4 h-4" />
-                <Switch 
-                  id="compact-view"
-                  checked={isCompactView}
-                  onCheckedChange={toggleCompactView}
-                />
-                <label htmlFor="compact-view" className="text-sm font-medium">
-                  Compact view
-                </label>
-              </div>
-            </div>
-          </div>
 
           <PanelGroup direction="horizontal" className="flex-1">
             <Panel 
@@ -286,6 +258,20 @@ const SocialMediaModeration = () => {
                         <p>Content is blurred for safety. Toggle "Unblur content" to view.</p>
                       </div>
                     )}
+                    
+                    {/* Control Bar */}
+                    <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Switch 
+                          id="blur-content" 
+                          checked={!isContentBlurred}
+                          onCheckedChange={handleUnblur}
+                        />
+                        <label htmlFor="blur-content" className="text-sm font-medium">
+                          Unblur content
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </Card>
 
