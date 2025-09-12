@@ -125,7 +125,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 onClick={handleFlagClick}
                 className={`p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm ${
                   isSelected 
-                    ? 'border-[hsl(var(--flag-selected))] bg-[hsl(var(--flag-selected-bg))]' 
+                    ? 'border-[hsl(var(--flag-selected))]' 
                     : 'border-gray-200'
                 } ${index < flags.length - 1 ? 'mb-3' : ''}`}
               >
