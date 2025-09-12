@@ -53,6 +53,12 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Flag selection states */
+    --flag-selected: 262 83% 58%;
+    --flag-selected-bg: 262 83% 98%;
+    --flag-warning: 25 95% 53%;
+    --flag-confidence-high: 120 100% 25%;
   }
 
   .dark {
@@ -91,6 +97,12 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Flag selection states - dark mode */
+    --flag-selected: 262 83% 58%;
+    --flag-selected-bg: 262 20% 12%;
+    --flag-warning: 25 95% 53%;
+    --flag-confidence-high: 120 100% 25%;
   }
 }
 

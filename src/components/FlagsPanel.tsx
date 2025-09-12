@@ -36,6 +36,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   onSeekToTimestamp,
   sidebarExpanded
 }) => {
+  const [selectedFlagId, setSelectedFlagId] = useState<string | null>(null);
   console.log('FlagsPanel received flags:', flags.map(f => ({
     type: f.type,
     hasTimestamps: !!f.timestamps,
@@ -103,61 +104,86 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 timestamps: flag.timestamps
               });
               
+              const isSelected = selectedFlagId === flag.id;
+              const timestampCount = flag.timestamps?.length || 0;
+              
+              const handleFlagClick = () => {
+                if (isSelected) {
+                  setSelectedFlagId(null);
+                } else {
+                  setSelectedFlagId(flag.id);
+                  // Seek to first timestamp if available
+                  if (flag.timestamps && flag.timestamps.length > 0 && onSeekToTimestamp) {
+                    onSeekToTimestamp(flag.timestamps[0].timeOffset);
+                  }
+                }
+              };
+              
               return (
               <div 
                 key={flag.id}
-                className={`p-3 bg-white border border-gray-200 rounded-lg ${index < flags.length - 1 ? 'mb-3' : ''}`}
+                onClick={handleFlagClick}
+                className={`p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm ${
+                  isSelected 
+                    ? 'border-[hsl(var(--flag-selected))] bg-[hsl(var(--flag-selected-bg))]' 
+                    : 'border-gray-200'
+                } ${index < flags.length - 1 ? 'mb-3' : ''}`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[hsl(var(--flag-warning))] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-xs font-medium text-gray-900">{flag.type}</span>
+                    <span className="text-base font-semibold text-gray-900">{flag.type}</span>
                   </div>
-                  {getStatusBadge(flag.status, flag.confidence)}
+                  <div className="text-right text-xs text-gray-500">
+                    {flag.timestamp}
+                  </div>
                 </div>
                 
-                <div className="space-y-1 text-xs text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{flag.timestamp}</span>
-                  </div>
-                  <div className={`font-medium ${getConfidenceColor(flag.confidence)}`}>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-sm font-medium text-[hsl(var(--flag-confidence-high))]">
                     {flag.confidence}% confidence
                   </div>
-                  
-                  {/* Show timestamps if available */}
-                  {flag.timestamps && flag.timestamps.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                      <div className="text-xs font-medium text-black mb-1">
-                        Violation timestamps ({flag.timestamps.length}):
-                      </div>
-                      <div className="text-xs text-gray-700">
-                        {flag.timestamps.map((timestamp: any, idx: number) => (
-                          <span key={idx} className="inline-flex items-center gap-1 mr-3 mb-1">
-                            <button 
-                              className="font-mono font-medium text-black underline hover:text-gray-700 cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onSeekToTimestamp) {
-                                  onSeekToTimestamp(timestamp.timeOffset);
-                                } else {
-                                  console.log('Seek function not available, timestamp:', timestamp.timeOffset, 'seconds');
-                                }
-                              }}
-                            >
-                              {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
-                            </button>
-                            <span className="text-gray-500">({Math.round(timestamp.confidence * 100)}%)</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div className="text-sm text-gray-600">
+                    {timestampCount} issue timestamp{timestampCount !== 1 ? 's' : ''}
+                  </div>
                 </div>
+                
+                {/* Show expanded timestamps only when selected */}
+                {isSelected && flag.timestamps && flag.timestamps.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="text-sm font-medium text-gray-900 mb-3">
+                      Issue timestamps ({flag.timestamps.length}):
+                    </div>
+                    <div className="space-y-2">
+                      {flag.timestamps.map((timestamp: any, idx: number) => (
+                        <div 
+                          key={idx}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onSeekToTimestamp) {
+                              onSeekToTimestamp(timestamp.timeOffset);
+                            }
+                          }}
+                          className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-[hsl(var(--flag-warning))]" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <span className="font-mono font-medium text-gray-900">
+                              {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-600">
+                            Confidence: {Math.round(timestamp.confidence * 100)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               );
             })
