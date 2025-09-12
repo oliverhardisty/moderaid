@@ -97,7 +97,7 @@ export const IssuesPanel: React.FC<IssuesPanelProps> = ({
               <p className="text-xs text-gray-400 mt-1">Content passed all AI moderation checks</p>
             </div>
           ) : (
-            issues.filter(issue => issue.timestamps && issue.timestamps.length > 0).map((issue, index) => {
+            issues.map((issue, index) => {
               console.log('Rendering issue:', {
                 id: issue.id,
                 type: issue.type,
