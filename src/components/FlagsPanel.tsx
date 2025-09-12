@@ -178,7 +178,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                           >
                             <div className="flex items-center gap-2">
                               <AlertTriangle className="w-4 h-4 text-[hsl(var(--flag-warning))]" />
-                              <span className="font-mono font-medium text-gray-900">
+                              <span className="font-sans font-medium text-gray-900">
                                 {Math.floor(timestamp.timeOffset / 60)}:{Math.floor(timestamp.timeOffset % 60).toString().padStart(2, '0')}
                               </span>
                             </div>
