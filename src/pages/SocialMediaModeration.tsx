@@ -253,11 +253,6 @@ const SocialMediaModeration = () => {
                       </div>
                     </div>
                     
-                    {isContentBlurred && (
-                      <div className="text-center py-4 text-gray-500">
-                        <p>Content is blurred for safety. Toggle "Unblur content" to view.</p>
-                      </div>
-                    )}
                     
                     {/* Control Bar */}
                     <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
