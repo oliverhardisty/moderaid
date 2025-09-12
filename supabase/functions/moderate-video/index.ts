@@ -402,7 +402,7 @@ Deno.serve(async (req) => {
         if (name.includes(sig.match)) {
           const prev = categoryScores[sig.category] ?? 0;
           categoryScores[sig.category] = Number(Math.max(prev, maxConf).toFixed(3));
-          if (maxConf >= 0.5 && !categories.includes(sig.category)) {
+          if (maxConf >= 0.1 && !categories.includes(sig.category)) {
             categories.push(sig.category);
             flagged = true;
           }
