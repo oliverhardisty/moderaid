@@ -97,7 +97,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
               <p className="text-xs text-gray-400 mt-1">Content passed all AI moderation checks</p>
             </div>
           ) : (
-            flags.map((flag, index) => {
+            flags.filter(flag => flag.timestamps && flag.timestamps.length > 0).map((flag, index) => {
               console.log('Rendering flag:', {
                 id: flag.id,
                 type: flag.type,
