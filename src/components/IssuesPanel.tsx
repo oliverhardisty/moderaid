@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle } from 'lucide-react';
 
-interface Flag {
+interface Issue {
   id: string;
   type: string;
   status: 'active' | 'dismissed';
@@ -16,8 +16,8 @@ interface Flag {
   timestamps?: Array<{ timeOffset: number; categories: string[]; confidence: number }>;
 }
 
-interface FlagsPanelProps {
-  flags: Flag[];
+interface IssuesPanelProps {
+  issues: Issue[];
   userReports: number;
   uploaderStatus: 'good' | 'warning' | 'bad';
   moderationHistory: number;
@@ -27,8 +27,8 @@ interface FlagsPanelProps {
   sidebarExpanded?: boolean;
 }
 
-export const FlagsPanel: React.FC<FlagsPanelProps> = ({ 
-  flags, 
+export const IssuesPanel: React.FC<IssuesPanelProps> = ({ 
+  issues,
   userReports, 
   uploaderStatus, 
   moderationHistory,
@@ -37,9 +37,9 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   onSeekToTimestamp,
   sidebarExpanded
 }) => {
-  const [selectedFlagId, setSelectedFlagId] = useState<string | null>(null);
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [selectedTimestampIndex, setSelectedTimestampIndex] = useState<number | null>(null);
-  console.log('FlagsPanel received flags:', flags.map(f => ({
+  console.log('IssuesPanel received issues:', issues.map(f => ({
     type: f.type,
     hasTimestamps: !!f.timestamps,
     timestampsLength: f.timestamps?.length || 0
@@ -69,16 +69,16 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
   };
 
   return (
-    <Tabs defaultValue="ai-flags" className="h-full flex flex-col">
+    <Tabs defaultValue="ai-issues" className="h-full flex flex-col">
       <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto border-b border-gray-200 flex-shrink-0 sticky top-0 z-10 px-4">
-        <TabsTrigger value="ai-flags" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">AI flags</TabsTrigger>
+        <TabsTrigger value="ai-issues" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">AI issues</TabsTrigger>
         <TabsTrigger value="reports" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Reports</TabsTrigger>
         <TabsTrigger value="activity" className="bg-transparent border-0 rounded-none pb-3 px-4 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 text-gray-500 font-medium">Activity</TabsTrigger>
       </TabsList>
       
       <div className="flex-1 overflow-hidden relative">
         <ScrollArea className="h-full">
-          <TabsContent value="ai-flags" className="mt-4 space-y-4 px-3">
+          <TabsContent value="ai-issues" className="mt-4 space-y-4 px-3">
         <div className="space-y-3">
           {isAnalyzing ? (
             <div className="flex items-center justify-center py-8">
@@ -88,68 +88,68 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 <p className="text-xs text-gray-400 mt-1">Checking with Google Video Intelligence</p>
               </div>
             </div>
-          ) : flags.length === 0 ? (
+          ) : issues.length === 0 ? (
             <div className="text-center py-8">
               <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-sm text-gray-600">No automated flags detected</p>
+              <p className="text-sm text-gray-600">No automated issues detected</p>
               <p className="text-xs text-gray-400 mt-1">Content passed all AI moderation checks</p>
             </div>
           ) : (
-            flags.filter(flag => flag.timestamps && flag.timestamps.length > 0).map((flag, index) => {
-              console.log('Rendering flag:', {
-                id: flag.id,
-                type: flag.type,
-                hasTimestamps: !!flag.timestamps,
-                timestampsLength: flag.timestamps?.length || 0,
-                timestamps: flag.timestamps
+            issues.filter(issue => issue.timestamps && issue.timestamps.length > 0).map((issue, index) => {
+              console.log('Rendering issue:', {
+                id: issue.id,
+                type: issue.type,
+                hasTimestamps: !!issue.timestamps,
+                timestampsLength: issue.timestamps?.length || 0,
+                timestamps: issue.timestamps
               });
               
-              const isSelected = selectedFlagId === flag.id;
-              const timestampCount = flag.timestamps?.length || 0;
+              const isSelected = selectedIssueId === issue.id;
+              const timestampCount = issue.timestamps?.length || 0;
               
-              const handleFlagClick = () => {
+              const handleIssueClick = () => {
                 if (isSelected) {
-                  setSelectedFlagId(null);
+                  setSelectedIssueId(null);
                   setSelectedTimestampIndex(null);
                 } else {
-                  setSelectedFlagId(flag.id);
+                  setSelectedIssueId(issue.id);
                   setSelectedTimestampIndex(0); // Select first timestamp by default
                   // Seek to first timestamp if available
-                  if (flag.timestamps && flag.timestamps.length > 0 && onSeekToTimestamp) {
-                    onSeekToTimestamp(flag.timestamps[0].timeOffset);
+                  if (issue.timestamps && issue.timestamps.length > 0 && onSeekToTimestamp) {
+                    onSeekToTimestamp(issue.timestamps[0].timeOffset);
                   }
                 }
               };
               
               return (
               <div 
-                key={flag.id}
-                onClick={handleFlagClick}
+                key={issue.id}
+                onClick={handleIssueClick}
                 className={`p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm ${
                   isSelected 
-                    ? 'border-[hsl(var(--flag-selected))]' 
+                    ? 'border-[hsl(var(--issue-selected))]' 
                     : 'border-gray-200'
-                } ${index < flags.length - 1 ? 'mb-3' : ''}`}
+                } ${index < issues.length - 1 ? 'mb-3' : ''}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="block">
                     <div className="flex items-center gap-2 mb-1">
-                      <svg className="w-4 h-4 text-[hsl(var(--flag-warning))] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-4 h-4 text-[hsl(var(--issue-warning))] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="text-base font-semibold text-gray-900">{flag.type}</span>
+                    <span className="text-base font-semibold text-gray-900">{issue.type}</span>
                   </div>
                   <div className="text-right text-xs text-gray-500">
-                    {flag.timestamp}
+                    {issue.timestamp}
                   </div>
                 </div>
                 
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="text-sm font-medium text-[hsl(var(--flag-confidence-high))]">
-                    {flag.confidence}% confidence
+                  <div className="text-sm font-medium text-[hsl(var(--issue-confidence-high))]">
+                    {issue.confidence}% confidence
                   </div>
                   <div className="text-sm text-gray-600">
                     {timestampCount} issue timestamp{timestampCount !== 1 ? 's' : ''}
@@ -157,10 +157,10 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
                 </div>
                 
                 {/* Show expanded timestamps only when selected */}
-                {isSelected && flag.timestamps && flag.timestamps.length > 0 && (
+                {isSelected && issue.timestamps && issue.timestamps.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="space-y-2">
-                      {flag.timestamps.map((timestamp: any, idx: number) => {
+                      {issue.timestamps.map((timestamp: any, idx: number) => {
                         const isTimestampSelected = selectedTimestampIndex === idx;
                         return (
                           <div 
@@ -211,7 +211,7 @@ export const FlagsPanel: React.FC<FlagsPanelProps> = ({
               {userReports}
             </Badge>
           </div>
-          <p className="text-xs text-gray-600">Viewer reports and community flagging</p>
+          <p className="text-xs text-gray-600">Viewer reports and community issues</p>
         </div>
       </TabsContent>
       

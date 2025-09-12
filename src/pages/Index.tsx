@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { FlagsPanel } from '@/components/FlagsPanel';
+import { IssuesPanel } from '@/components/IssuesPanel';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { ContentMetadata } from '@/components/ContentMetadata';
 import { ActionBar } from '@/components/ActionBar';
@@ -21,7 +21,7 @@ const Index = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isContentBlurred, setIsContentBlurred] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [moderationFlags, setModerationFlags] = useState<any[]>([]);
+  const [moderationIssues, setModerationIssues] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
   const [currentModerationResult, setCurrentModerationResult] = useState<any>(null);
@@ -78,7 +78,7 @@ const Index = () => {
     console.log('Starting content analysis (Google)...');
     setIsAnalyzing(true);
     try {
-      const flags: any[] = [];
+      const issues: any[] = [];
 
       // Try Google Video Intelligence first (skip if YouTube URL)
       if (contentData.videoUrl) {
@@ -96,7 +96,7 @@ const Index = () => {
         }
         const isYouTube = urlLower.includes('youtube.com') || urlLower.includes('youtu.be');
         if (isYouTube) {
-          flags.push({
+          issues.push({
             id: 'google-skip-youtube',
             type: 'Upload Required for Analysis',
             status: 'dismissed' as const,
@@ -124,7 +124,7 @@ const Index = () => {
                   timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
                   categoryTimestamps
                 });
-                flags.push({
+                issues.push({
                   id: `google-${category}-${index}`,
                   type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                   status: 'active' as const,
@@ -137,7 +137,7 @@ const Index = () => {
                 });
 
                 // Debug log for timestamps
-                console.log(`Created flag for ${category}:`, {
+                console.log(`Created issue for ${category}:`, {
                   category,
                   timestampsCount: categoryTimestamps.length,
                   timestamps: categoryTimestamps
@@ -146,7 +146,7 @@ const Index = () => {
             }
           } catch (googleError) {
             console.warn('Google Video Intelligence failed:', googleError);
-            flags.push({
+            issues.push({
               id: 'google-failed',
               type: 'Google Analysis Failed',
               status: 'dismissed' as const,
@@ -166,7 +166,7 @@ const Index = () => {
         if (azureResult?.flagged) {
           azureResult.categories.forEach((category: string, index: number) => {
             const score = azureResult.categoryScores?.[category] ?? 0;
-            flags.push({
+            issues.push({
               id: `azure-${category}-${index}`,
               type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
               status: 'active' as const,
@@ -180,7 +180,7 @@ const Index = () => {
         }
       } catch (azureError) {
         console.warn('Azure Content Safety failed:', azureError);
-        flags.push({
+        issues.push({
           id: 'azure-failed',
           type: 'Azure Analysis Failed',
           status: 'dismissed' as const,
@@ -192,9 +192,9 @@ const Index = () => {
         });
       }
 
-      // If no flags were generated, add a content approved flag
-      if (flags.length === 0 || flags.every(f => f.status === 'dismissed')) {
-        flags.push({
+      // If no issues were generated, add a content approved issue
+      if (issues.length === 0 || issues.every(f => f.status === 'dismissed')) {
+        issues.push({
           id: 'content-approved',
           type: 'Content Approved',
           status: 'dismissed' as const,
@@ -205,21 +205,21 @@ const Index = () => {
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
-      setModerationFlags(flags);
+      setModerationIssues(issues);
 
       // Save moderation results to localStorage for persistence
-      const activeFlags = flags.filter(f => f.status === 'active');
-      // Collect all timestamps from active flags (if any)
-      const allTimestamps = activeFlags.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
+      const activeIssues = issues.filter(f => f.status === 'active');
+      // Collect all timestamps from active issues (if any)
+      const allTimestamps = activeIssues.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
         timeOffset: number;
         categories: string[];
         confidence: number;
       }>);
-      if (activeFlags.length > 0) {
+      if (activeIssues.length > 0) {
         const moderationResult = {
           flagged: true,
-          categories: activeFlags.map(f => f.type),
-          categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
+          categories: activeIssues.map(f => f.type),
+          categoryScores: Object.fromEntries(activeIssues.map(f => [f.type, f.confidence / 100])),
           provider: 'Multi-Provider Analysis',
           timestamp: new Date().toISOString(),
           // Persist timestamps so they survive refresh
@@ -238,15 +238,15 @@ const Index = () => {
         updateModerationResult(contentData.id, 'completed', moderationResult);
       }
 
-      // Debug log the final flags array
-      console.log('Final moderation flags with timestamps:', flags.map(f => ({
+      // Debug log the final issues array
+      console.log('Final moderation issues with timestamps:', issues.map(f => ({
         type: f.type,
         timestampsCount: f.timestamps?.length || 0,
         hasTimestamps: !!f.timestamps
       })));
       toast({
         title: "Analysis Complete",
-        description: `Found ${activeFlags.length} flags for "${contentData.title}" using Google and Azure`
+        description: `Found ${activeIssues.length} issues for "${contentData.title}" using Google and Azure`
       });
     } catch (error: any) {
       console.error('Content analysis failed:', error);
@@ -260,7 +260,7 @@ const Index = () => {
       } else if (error?.message?.includes('403') || error?.message?.includes('unauthorized')) {
         errorDescription = 'API keys invalid or services not enabled. Check your Google Cloud configuration.';
       }
-      setModerationFlags([{
+      setModerationIssues([{
         id: 'analysis-failed',
         type: 'Analysis Failed',
         status: 'active' as const,
@@ -322,7 +322,7 @@ const Index = () => {
       const publicUrl = pub.publicUrl;
       // Run Google analysis on uploaded URL
       const googleResult = await moderateWithGoogleVideo(publicUrl);
-      const flags: any[] = [];
+      const issues: any[] = [];
       if (googleResult?.flagged) {
         googleResult.categories.forEach((category: string, index: number) => {
           const score = googleResult.categoryScores?.[category] ?? 0;
@@ -338,7 +338,7 @@ const Index = () => {
             timestampCategories: googleResult.timestamps?.map(ts => ts.categories) || [],
             categoryTimestamps
           });
-          flags.push({
+          issues.push({
             id: `google-${category}-${index}`,
             type: category.replace(/[/_]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
             status: 'active' as const,
@@ -351,15 +351,15 @@ const Index = () => {
           });
 
           // Debug log for timestamps
-          console.log(`Created flag for ${category}:`, {
+          console.log(`Created issue for ${category}:`, {
             category,
             timestampsCount: categoryTimestamps.length,
             timestamps: categoryTimestamps
           });
         });
       }
-      if (flags.length === 0) {
-        flags.push({
+      if (issues.length === 0) {
+        issues.push({
           id: 'content-approved',
           type: 'Content Approved',
           status: 'dismissed' as const,
@@ -370,21 +370,21 @@ const Index = () => {
           icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
         });
       }
-      setModerationFlags(flags);
+      setModerationIssues(issues);
 
       // Save moderation results to localStorage for persistence
-      const activeFlags = flags.filter(f => f.status === 'active');
-      // Collect all timestamps from active flags (if any)
-      const allTimestamps = activeFlags.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
+      const activeIssues = issues.filter(f => f.status === 'active');
+      // Collect all timestamps from active issues (if any)
+      const allTimestamps = activeIssues.filter(f => Array.isArray(f.timestamps) && f.timestamps.length > 0).flatMap(f => f.timestamps as Array<{
         timeOffset: number;
         categories: string[];
         confidence: number;
       }>);
-      if (activeFlags.length > 0) {
+      if (activeIssues.length > 0) {
         const moderationResult = {
           flagged: true,
-          categories: activeFlags.map(f => f.type),
-          categoryScores: Object.fromEntries(activeFlags.map(f => [f.type, f.confidence / 100])),
+          categories: activeIssues.map(f => f.type),
+          categoryScores: Object.fromEntries(activeIssues.map(f => [f.type, f.confidence / 100])),
           provider: 'Google Video Intelligence',
           timestamp: new Date().toISOString(),
           timestamps: allTimestamps
@@ -403,7 +403,7 @@ const Index = () => {
       }
       toast({
         title: "Analysis Complete",
-        description: `Found ${activeFlags.length} flags for "${contentData.title}"`
+        description: `Found ${activeIssues.length} issues for "${contentData.title}"`
       });
     } catch (err: any) {
       console.error('Local upload analyze failed:', err);
@@ -471,7 +471,7 @@ const Index = () => {
             icon: 'https://api.builder.io/api/v1/image/assets/TEMP/9371b88034800825a248025fe5048d6623ff53f7?placeholderIfAbsent=true'
           });
         }
-        setModerationFlags(flags);
+        setModerationIssues(flags);
         setCurrentModerationResult(result);
         setIsAnalyzing(false);
       } else if (contentData.videoUrl && (!currentContent.moderation_result || currentContent.moderation_status !== 'completed')) {
@@ -560,7 +560,7 @@ const Index = () => {
             {/* Left Section - Tab Section */}
             <Panel defaultSize={30} minSize={20} maxSize={60} className="min-h-0">
               <div className="h-full flex flex-col min-h-0">
-                <FlagsPanel flags={moderationFlags} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
+                <IssuesPanel issues={moderationIssues} userReports={3} uploaderStatus="good" moderationHistory={3} isAnalyzing={isAnalyzing} onRunAnalysis={analyzeContent} onSeekToTimestamp={seekFunction} sidebarExpanded={sidebarExpanded} />
               </div>
             </Panel>
             

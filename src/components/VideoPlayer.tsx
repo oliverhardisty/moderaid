@@ -250,7 +250,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 Content Blurred for Protection
               </h3>
               <p className="text-sm text-gray-300 mb-6">
-                This content has been flagged as potentially sensitive material
+                This content has been identified as potentially sensitive material
               </p>
               <button
                 onClick={onUnblur}

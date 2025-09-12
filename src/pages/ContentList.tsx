@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Flag, Loader2 } from 'lucide-react';
+import { Search, Plus, AlertTriangle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContentItems } from '@/hooks/useContentItems';
 import { useModeration } from '@/hooks/useModeration';
@@ -89,13 +89,13 @@ const ContentList = () => {
     }
   }, [loading, contentItems, moderateWithGoogleVideo, updateModerationResult]);
 
-  // Helper function to get automated flag count
-  const getAutomatedFlagCount = (item: any) => {
+  // Helper function to get automated issue count
+  const getAutomatedIssueCount = (item: any) => {
     if (!item.moderation_result || !item.moderation_result.flagged) {
       return 0;
     }
     
-    // Count categories that were flagged
+    // Count categories that had issues
     return item.moderation_result.categories ? item.moderation_result.categories.length : 0;
   };
 
@@ -232,7 +232,7 @@ const ContentList = () => {
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Upload Date</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Views</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">User reports</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Automated flags</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Automated issues</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Priority</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
                     </tr>
@@ -264,7 +264,7 @@ const ContentList = () => {
                         <td className="py-4 px-4">
                           {item.user_reports > 0 ? (
                             <div className="flex items-center gap-1">
-                              <Flag className="w-3 h-3 text-red-500" />
+                              <AlertTriangle className="w-3 h-3 text-red-500" />
                               <span className="text-red-600 font-medium">{item.user_reports}</span>
                             </div>
                           ) : (
@@ -273,12 +273,12 @@ const ContentList = () => {
                         </td>
                         <td className="py-4 px-4">
                           {(() => {
-                            const flagCount = getAutomatedFlagCount(item);
-                            if (flagCount > 0) {
+                            const issueCount = getAutomatedIssueCount(item);
+                            if (issueCount > 0) {
                               return (
                                 <div className="flex items-center gap-1">
                                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                                  <span className="text-red-600 font-medium">{flagCount}</span>
+                                  <span className="text-red-600 font-medium">{issueCount}</span>
                                 </div>
                               );
                             } else if (item.moderation_status === 'completed') {

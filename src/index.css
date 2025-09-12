@@ -54,11 +54,11 @@ All colors MUST be HSL.
 
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Flag selection states */
-    --flag-selected: 262 83% 58%;
-    --flag-selected-bg: 262 83% 98%;
-    --flag-warning: 25 95% 53%;
-    --flag-confidence-high: 120 100% 25%;
+    /* Issue selection states */
+    --issue-selected: 262 83% 58%;
+    --issue-selected-bg: 262 83% 98%;
+    --issue-warning: 25 95% 53%;
+    --issue-confidence-high: 120 100% 25%;
   }
 
   .dark {
@@ -98,11 +98,11 @@ All colors MUST be HSL.
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Flag selection states - dark mode */
-    --flag-selected: 262 83% 58%;
-    --flag-selected-bg: 262 20% 12%;
-    --flag-warning: 25 95% 53%;
-    --flag-confidence-high: 120 100% 25%;
+    /* Issue selection states - dark mode */
+    --issue-selected: 262 83% 58%;
+    --issue-selected-bg: 262 20% 12%;
+    --issue-warning: 25 95% 53%;
+    --issue-confidence-high: 120 100% 25%;
   }
 }
 
