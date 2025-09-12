@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ContentList from "./pages/ContentList";
 import Index from "./pages/Index";
+import SocialMediaModeration from "./pages/SocialMediaModeration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<ContentList />} />
           <Route path="/content/:contentId" element={<Index />} />
+          <Route path="/social/:contentId" element={<SocialMediaModeration />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

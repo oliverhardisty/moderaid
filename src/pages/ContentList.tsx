@@ -42,6 +42,23 @@ const ContentList = () => {
   
   const { contentItems, loading, refetch, updateModerationResult } = useContentItems();
   const { moderateWithGoogleVideo } = useModeration();
+  
+  // Add social media post to the content list
+  const allContentItems = [
+    ...contentItems,
+    {
+      id: '#social01',
+      title: 'Social Media Post - Suspicious Marketing Claims',
+      upload_date: 'Dec 15, 2024',
+      views: 2341,
+      user_reports: 3,
+      priority: 'medium' as const,
+      status: 'pending' as const,
+      moderation_status: 'pending' as const,
+      moderation_result: null,
+      file_size: undefined // Social media posts don't have file sizes
+    }
+  ];
   const prefetchStartedRef = useRef(false);
   const [moderationInProgress, setModerationInProgress] = useState(false);
   const { toast } = useToast();
@@ -115,7 +132,13 @@ const ContentList = () => {
   const handleContentClick = (contentId: string) => {
     // Remove the # symbol and navigate with the clean ID
     const cleanId = contentId.replace('#', '');
-    navigate(`/content/${cleanId}`);
+    
+    // Navigate to social media moderation for social content
+    if (contentId === '#social01') {
+      navigate(`/social/${cleanId}`);
+    } else {
+      navigate(`/content/${cleanId}`);
+    }
   };
 
   const handleSidebarToggle = () => {
@@ -126,7 +149,7 @@ const ContentList = () => {
     refetch(); // Refresh the content list after upload
   };
 
-  const filteredContent = contentItems.filter(item => {
+  const filteredContent = allContentItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter;
