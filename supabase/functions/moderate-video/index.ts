@@ -391,6 +391,31 @@ Deno.serve(async (req) => {
       { match: 'punch', category: 'violence' },
       { match: 'kick', category: 'violence' },
       { match: 'aggressive', category: 'violence' },
+      { match: 'harm', category: 'violence' },
+      { match: 'hurt', category: 'violence' },
+      { match: 'injury', category: 'violence' },
+      { match: 'threat', category: 'violence' },
+      { match: 'danger', category: 'violence' },
+      { match: 'knife', category: 'weapons' },
+      { match: 'gun', category: 'weapons' },
+      { match: 'pistol', category: 'weapons' },
+      { match: 'rifle', category: 'weapons' },
+      { match: 'sword', category: 'weapons' },
+      { match: 'blade', category: 'weapons' },
+      { match: 'shooting', category: 'violence' },
+      { match: 'stabbing', category: 'violence' },
+      { match: 'slashing', category: 'violence' },
+      { match: 'beating', category: 'violence' },
+      { match: 'abuse', category: 'violence' },
+      { match: 'assault', category: 'violence' },
+      { match: 'murder', category: 'violence' },
+      { match: 'kill', category: 'violence' },
+      { match: 'death', category: 'violence' },
+      { match: 'wound', category: 'graphic_content' },
+      { match: 'gore', category: 'graphic_content' },
+      { match: 'brutal', category: 'violence' },
+      { match: 'savage', category: 'violence' },
+      { match: 'fierce', category: 'violence' },
     ];
 
     for (const label of allLabelGroups) {
@@ -402,7 +427,7 @@ Deno.serve(async (req) => {
         if (name.includes(sig.match)) {
           const prev = categoryScores[sig.category] ?? 0;
           categoryScores[sig.category] = Number(Math.max(prev, maxConf).toFixed(3));
-          if (maxConf >= 0.1 && !categories.includes(sig.category)) {
+          if (maxConf >= 0.01 && !categories.includes(sig.category)) {
             categories.push(sig.category);
             flagged = true;
           }
